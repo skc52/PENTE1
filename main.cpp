@@ -6,7 +6,7 @@
 #include "Computer.h"
 #include "Tournament.h"
 #include "Round.h"
-void gameLoop(Round *r, Board *b, Tournament *t, Player *h, Player *c);
+void gameLoop(Round *r, Board *b, Tournament *t);
 int main()
 {
     Tournament *tournament = new Tournament();
@@ -20,6 +20,8 @@ int main()
     // create the computer class
     std::string computerName = "ROBOT";
     Player *computer = new Computer(computerName);
+    // setup players for tournament
+    tournament->setUpPlayers(human, computer);
     // create the board class
     Board *board = new Board();
 
@@ -27,7 +29,7 @@ int main()
     while (wishToContinue)
     {
         Round *r = tournament->createANewRound();
-        gameLoop(r, board, tournament, human, computer);
+        gameLoop(r, board, tournament);
         wishToContinue = r->askToContinueGame();
     }
 
@@ -39,7 +41,7 @@ int main()
     return 0;
 }
 
-void gameLoop(Round *r, Board *b, Tournament *t, Player *h, Player *c)
+void gameLoop(Round *r, Board *b, Tournament *t)
 {
     // start the round
     r->startRound(t, b);
@@ -47,7 +49,7 @@ void gameLoop(Round *r, Board *b, Tournament *t, Player *h, Player *c)
     while (!gameEnded)
     {
         r->changeTurn();
-        r->askPositionInput(b);
+        // r->askPositionInput(b);
         // game won check?
         if (!r->getCurrentPlayer()->makeMove(r, b))
         {

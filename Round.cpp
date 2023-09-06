@@ -20,17 +20,17 @@ bool Round::coinToss()
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     // Generate a random number
     humanChoice = toupper(humanChoice);
-    int toss = (std::rand() % 2) ? 'H' : 'T';
+    char toss = (std::rand() % 2) ? 'H' : 'T';
     std::cout << "It was : " << toss << std::endl;
 
     if (humanChoice == toss)
     {
-        std::cout << "You won the toss! You will start the game.\n";
+        std::cout << "You won the toss!\n";
         return true;
     }
     else
     {
-        std::cout << "Computer won the toss. Computer will start the game.\n";
+        std::cout << "Computer won the toss.\n";
         return false;
     }
 }
@@ -39,18 +39,29 @@ void Round::startRound(Tournament *t, Board *b)
 {
     // Implementation for startRound
     std::cout << "STARTING ROUND\n";
+    b->resetBoard();
     // intialize white and black players
-    if (coinToss())
-    { // on winning coin toss white will be human
-        currentPlayer = t->getHuman();
-        nextPlayer = t->getComputer();
+    if (t->getRoundsCount() <= 1)
+    {
+        if (coinToss())
+        { // on winning coin toss white will be human
+            currentPlayer = t->getHuman();
+            nextPlayer = t->getComputer();
+        }
+        else
+        {
+            currentPlayer = t->getComputer();
+            nextPlayer = t->getHuman();
+        }
     }
     else
     {
-        currentPlayer = t->getComputer();
-        nextPlayer = t->getHuman();
+        currentPlayer = t->getPreviousWinner();
+        nextPlayer = t->getPreviousLoser();
     }
-
+    currentPlayer->setColor('W');
+    nextPlayer->setColor('B');
+    std::cout << currentPlayer->getName() << " is starting the game\n";
     // Place the piece in J10 (10, 10)
 
     currentPlayer->makeMove(this, b);
@@ -92,6 +103,7 @@ void Round::askPositionInput(Board *b)
             continue;
         isValidPos = b->checkValidity();
     }
+    std::cout << "You entered\n";
 }
 
 int Round::getPairsCapturedNum(Player *p)
@@ -143,6 +155,11 @@ void Round::setFourConsecutive(Player *p, int foursCount)
 {
     // Implementation for setFourConsecutive
     fourConsecutive[p] = foursCount;
+
+    if (winnerOfTheRound == p)
+    {
+        fourConsecutive[p] -= 1;
+    }
 }
 
 void Round::setGamePoints(Player *p)
@@ -150,12 +167,13 @@ void Round::setGamePoints(Player *p)
     // Implementation for setGamePoints
     gamePoints[p] = 5;
     winnerOfTheRound = currentPlayer;
+    loserOFTheRound = nextPlayer;
 }
 
 void Round::announceWinnerOfTheRound()
 {
     // Implementation for announceWinnerOfTheRound
-    if (!getWinner())
+    if (getWinner())
     {
         std::cout << "ROUND WINNER " << getWinner()->getName() << std::endl;
     }
@@ -212,4 +230,10 @@ Player *Round::getWinner()
 {
     // Implementation for getWinner
     return winnerOfTheRound;
+}
+
+Player *Round::getLoser()
+{
+    // Implementation for getWinner
+    return loserOFTheRound;
 }

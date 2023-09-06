@@ -1,0 +1,139 @@
+// check for fours 
+  cout << "initializing board" << endl;
+    int board[20][20] = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        
+    };
+     // Implement this method to count consecutive 4 pieces
+    int piece = 1;
+    int foursCount = 0;
+    
+  
+    
+    //start at the beginning of each row and calculate the number of consecutive 4s
+    for (int i = 1; i < 20; i++){
+        for (int j = 1; j < 16; j++){//16 to prevent out of bounds, for columns more than 16 there wont be consecutive 4s starting at that point
+            bool consecutive4 = true;
+            for (int k = 0;k<4; k++){
+                if (board[i][j+k]!=piece){
+                    consecutive4 = false;
+                    j+=k;
+                    break;
+                }     
+            }
+            if (consecutive4){
+                foursCount++;
+            }
+        }
+    }
+    
+    
+    //start at the beginning of each column and calculate the number of consecutive 4s
+    for (int i = 1; i < 20; i++){
+        for (int j = 1; j < 16; j++){//16 to prevent out of bounds, for columns more than 16 there wont be consecutive 4s starting at that point
+            bool consecutive4 = true;
+            for (int k = 0;k<4; k++){
+                if (board[j+k][i]!=piece){
+                    consecutive4 = false;
+                    j+=k;
+                    break;
+                }     
+            }
+            if (consecutive4){
+                foursCount++;
+            }
+        }
+    }
+    
+    //iterate through forward diagonals formula:row+k, col+k
+    //starting column as 1 for each diagonal, start from row 16, and move your way up to row 1,
+    //start from 16 since there wont be consecutive4s starting after 16
+    for (int i = 16; i>=1; i--){//row
+        for (int j = 1; j < 20-i+1; j++){//col
+            bool consecutive4 = true;
+            for (int k = 0;k<4; k++){
+                if (board[i+k][j+k]!=piece){
+                    consecutive4 = false;
+                    j+=k;
+                    break;
+                }     
+            }
+            if (consecutive4){
+                foursCount++;
+            }
+        }
+    }
+    //starting row as 1 for each diagonal, start from col2 since col1 is already covered above , and move right until col 16;
+    //upto 16 since there wont be consecutive4s starting after 16
+    for (int i = 2; i <17; i++){//col
+        for (int j = 1; j < 20-i+1; j++){//row
+            bool consecutive4 = true;
+            for (int k = 0;k<4; k++){
+                if (board[j+k][i+k]!=piece){
+                    consecutive4 = false;
+                    j+=k;
+                    break;
+                }     
+            }
+            if (consecutive4){
+                foursCount++;
+            }
+        }
+    }
+    
+    
+    //iterate through backward diagonals formula:row-k, col+k
+  
+    for (int i = 19; i>=4; i--){//row
+        for (int j = 1; j <= i; j++){//col
+            bool consecutive4 = true;
+            for (int k = 0;k<4; k++){
+                if (board[i-k][j+k]!=piece){
+                    consecutive4 = false;
+                    j+=k;
+                    break;
+                }     
+            }
+            if (consecutive4){
+                foursCount++;
+            }
+        }
+    }
+   
+    for (int i = 2; i <20; i++){//col
+        for (int j = 2; j < 20-i+1; j++){//row
+            bool consecutive4 = true;
+            for (int k = 0;k<4; k++){
+                if (board[j-k][i+k]!=piece){
+                    consecutive4 = false;
+                    j+=k;
+                    break;
+                }     
+            }
+            if (consecutive4){
+                foursCount++;
+            }
+        }
+    }
+   
+   
+   cout << "Number of 4 1s is " << foursCount << endl;

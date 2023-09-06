@@ -26,8 +26,8 @@ Tournament::~Tournament()
 
 void Tournament::setUpPlayers(Player *h, Player *c)
 {
-    this->human = h;
-    this->computer = c;
+    human = h;
+    computer = c;
 }
 
 Round *Tournament::createANewRound()
@@ -36,7 +36,20 @@ Round *Tournament::createANewRound()
     this->rounds.push_back(r);
     return r;
 }
-
+Player *Tournament::getPreviousWinner()
+{
+    int ind = getRoundsCount() - 2;
+    return rounds[ind]->getWinner();
+}
+Player *Tournament::getPreviousLoser()
+{
+    int ind = getRoundsCount() - 2;
+    return rounds[ind]->getLoser();
+}
+int Tournament::getRoundsCount()
+{
+    return rounds.size();
+}
 int Tournament::getTotalScores(Player *p)
 {
     int totalScore = 0;
@@ -47,6 +60,7 @@ int Tournament::getTotalScores(Player *p)
         totalScore += r->getFourConsecutivesNum(p);
         totalScore += r->getGamePoints(p);
     }
+    return totalScore;
 }
 
 void Tournament::showTotalScoresForBoth()

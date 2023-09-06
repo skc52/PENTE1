@@ -21,6 +21,9 @@ public:
     void displayScoresForAllRounds();
     Player *getHuman();
     Player *getComputer();
+    int getRoundsCount();
+    Player *getPreviousWinner(); // this will be helpful in setting up colors in the next round
+    Player *getPreviousLoser();  // this will be helpful in setting up colors in the next round
 
 private:
     Player *human;

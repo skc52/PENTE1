@@ -92,7 +92,7 @@ bool Board::checkValidity()
         // TODO check three steps away, if false return false, and prompt the user to place 3 steps away
         return true;
     }
-    if (isWithinBounds(this->row, this->col))
+    if (!isWithinBounds(this->row, this->col))
     {
         showComment("Out of Bounds");
         return false;

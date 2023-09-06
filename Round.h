@@ -11,8 +11,8 @@ class Tournament;
 class Round
 {
 public:
-    Round(){};
-    ~Round(){};
+    Round();
+    // ~Round(){};
     bool coinToss();                          // will determine currentPlayer and nextPlayer
     void startRound(Tournament *t, Board *b); // reset board and start the game
     void changeTurn();                        // swap currentPlayer and nextPlayer
@@ -31,11 +31,13 @@ public:
     Player *getCurrentPlayer();
     Player *getNextPlayer();
     Player *getWinner();
+    Player *getLoser();
 
 private:
     Player *currentPlayer;
     Player *nextPlayer;
     Player *winnerOfTheRound;
+    Player *loserOFTheRound;
     std::map<Player *, int> pairsCaptured;
     std::map<Player *, int> fourConsecutive;
     std::map<Player *, int> gamePoints;
