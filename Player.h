@@ -12,7 +12,7 @@ public:
     virtual ~Player();
 
     // Abstract method to make a move (to be implemented by derived classes)
-    virtual void makeMove(Round *r, Board *b) = 0;
+    virtual bool makeMove(Round *r, Board *b) = 0; // return false if the game has ended
 
     // Getters
     const std::string &getName() const;

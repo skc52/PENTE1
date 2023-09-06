@@ -152,7 +152,7 @@ void Round::setGamePoints(Player *p)
     winnerOfTheRound = currentPlayer;
 }
 
-void Round::announceWinnerOfTheRound(Player *p)
+void Round::announceWinnerOfTheRound()
 {
     // Implementation for announceWinnerOfTheRound
     if (!getWinner())

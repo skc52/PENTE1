@@ -9,7 +9,7 @@
 // Implementation of Human class
 Human::Human(const std::string &name) : Player(name) {}
 
-void Human::makeMove(Round *r, Board *b)
+bool Human::makeMove(Round *r, Board *b)
 {
     // call askinput from board
     r->askPositionInput(b);

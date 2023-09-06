@@ -47,6 +47,7 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
     //   askInput();
 
     // place the piece, if it is the first turn place in the centre
+    // todo third turn , three steps away
     if (r->getTurnNum() == 0 && r->getCurrentPlayer()->getColor() == 'W')
     {
         board[10][10] = 'W';
@@ -85,8 +86,10 @@ bool Board::checkValidity()
     // position must be within bounds and empty
 
     // TODO FOR THE SECOND TURN OF WHITE, MUST BE PLACED 3 steps away from the center
+
     if (isWithinBounds(this->row, this->col) && board[row][col] == '0')
     {
+        // TODO check three steps away, if false return false, and prompt the user to place 3 steps away
         return true;
     }
     if (isWithinBounds(this->row, this->col))
@@ -188,7 +191,7 @@ bool Board::capturePairs(Round *r, Player *p, int dx, int dy) // returns true if
     if (r->getPairsCapturedNum(p) == 5)
     {
         r->setGamePoints(p);
-        r->announceWinnerOfTheRound(p);
+        r->announceWinnerOfTheRound();
         return true;
     }
 
@@ -239,7 +242,7 @@ bool Board::checkForFive(Round *r)
         if (count >= 5)
         {
             r->setGamePoints(r->getCurrentPlayer());
-            r->announceWinnerOfTheRound(r->getCurrentPlayer());
+            r->announceWinnerOfTheRound();
             return true;
         }
     }

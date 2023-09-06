@@ -8,7 +8,7 @@ public:
     Human(const std::string &name);
 
     // Implement the pure virtual function
-    void makeMove(Round *r, Board *b) override;
+    bool makeMove(Round *r, Board *b) override;
 
     // Other member functions specific to the Human player
 };

@@ -8,12 +8,12 @@
 // Implementation of Computer class
 Computer::Computer(const std::string &name) : Player(name) {}
 
-void Computer::makeMove(Round *r, Board *b)
+bool Computer::makeMove(Round *r, Board *b)
 {
     // determine position from the strategy class
     // for now ask input for computer too,
     r->askPositionInput(b);
     // call place your piece function from board
-    b->placeYourPiece(r);
+    return b->placeYourPiece(r);
     // call change turn from round here
 }

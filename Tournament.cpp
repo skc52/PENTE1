@@ -2,6 +2,9 @@
 #include "Round.h"
 #include "Player.h"
 
+Tournament::Tournament()
+{
+}
 Tournament::~Tournament()
 {
     if (human != nullptr)

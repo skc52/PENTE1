@@ -24,10 +24,10 @@ public:
     int getGamePoints(Player *p);
     void setPairsCapturedNum(Player *p);
     void setFourConsecutive(Player *p, int foursCount);
-    void setGamePoints(Player *p);            // set winner too , game ends here, 5 consecutive pieces
-    void announceWinnerOfTheRound(Player *p); // whichever player has game points is the winner
-    void displayClosingStats();               // show the pairsCaptured, fourConsecutives, and the game points for both players
-    bool askToContinueGame();                 // ask human to continue the round
+    void setGamePoints(Player *p);   // set winner too , game ends here, 5 consecutive pieces
+    void announceWinnerOfTheRound(); // whichever player has game points is the winner
+    void displayClosingStats();      // show the pairsCaptured, fourConsecutives, and the game points for both players
+    bool askToContinueGame();        // ask human to continue the round
     Player *getCurrentPlayer();
     Player *getNextPlayer();
     Player *getWinner();
