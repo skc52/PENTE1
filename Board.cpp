@@ -46,21 +46,31 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
     // keep on asking until a valid input is given
     //   askInput();
 
-    // place the piece
-    board[this->row][this->col] = r->getCurrentPlayer()->getColor();
-
-    // if valid, check for pairs to capture
-    if (checkAndCapture(r, r->getCurrentPlayer(), r->getNextPlayer()))
+    // place the piece, if it is the first turn place in the centre
+    if (r->getTurnNum() == 0 && r->getCurrentPlayer()->getColor() == 'W')
     {
-        std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
-        return false;
+        board[10][10] = 'W';
     }
-    // also checks for 5 consecutive pieces, if so game terminates
-    // TODO: how to terminate the game
-    if (checkForFive())
-    { // if five consecutive return false to end the game loop
-        std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
-        return false;
+    else
+    {
+        board[this->row][this->col] = r->getCurrentPlayer()->getColor();
+
+        // if valid, check for pairs to capture
+        if (checkAndCapture(r, r->getCurrentPlayer(), r->getNextPlayer()))
+        {
+            // count the fours and update in  round
+            checkForFours(r, r->getCurrentPlayer()->getColor());
+            std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
+            return false;
+        }
+        // also checks for 5 consecutive pieces, if so game terminates
+        // TODO: how to terminate the game
+        if (checkForFive(r))
+        { // if five consecutive return false to end the game loop
+            checkForFours(r, r->getCurrentPlayer()->getColor());
+            std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
+            return false;
+        }
     }
     return true;
     // if game is still continuining, pass the turn
@@ -73,6 +83,8 @@ bool Board::checkValidity()
     // Implement this method to check if the position is valid
     // private members row and col hold the inputted values
     // position must be within bounds and empty
+
+    // TODO FOR THE SECOND TURN OF WHITE, MUST BE PLACED 3 steps away from the center
     if (isWithinBounds(this->row, this->col) && board[row][col] == '0')
     {
         return true;
@@ -171,10 +183,11 @@ bool Board::capturePairs(Round *r, Player *p, int dx, int dy) // returns true if
     board[nextRow2][nextCol2] = '0';
 
     // TODO update scores for players
-    r->updatePairsCaptured(p);
+    r->setPairsCapturedNum(p);
     //  TODO captured pair == 5, game won, announce winner, closing stats, checkforfours
     if (r->getPairsCapturedNum(p) == 5)
     {
+        r->setGamePoints(p);
         r->announceWinnerOfTheRound(p);
         return true;
     }
@@ -183,7 +196,7 @@ bool Board::capturePairs(Round *r, Player *p, int dx, int dy) // returns true if
 }
 
 // Member function to check for five consecutive pieces
-bool Board::checkForFive()
+bool Board::checkForFive(Round *r)
 {
     // Implement this method to check for five consecutive pieces
     char currentPlayerPiece = board[this->row][this->col]; // Current player's piece
@@ -225,7 +238,8 @@ bool Board::checkForFive()
         // will start the next round, if the game continues
         if (count >= 5)
         {
-
+            r->setGamePoints(r->getCurrentPlayer());
+            r->announceWinnerOfTheRound(r->getCurrentPlayer());
             return true;
         }
     }
@@ -233,7 +247,7 @@ bool Board::checkForFive()
 }
 
 // Member function to count the number of consecutive 4s throughout the board
-int Board::checkForFours(char piece)
+int Board::checkForFours(Round *r, char piece)
 {
     // Implement this method to count consecutive 4 pieces
     int foursCount = 0;
@@ -376,6 +390,8 @@ int Board::checkForFours(char piece)
             }
         }
     }
+
+    r->setFourConsecutive(r->getCurrentPlayer(), foursCount);
 
     return foursCount;
 }

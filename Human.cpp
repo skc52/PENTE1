@@ -12,7 +12,8 @@ Human::Human(const std::string &name) : Player(name) {}
 void Human::makeMove(Round *r, Board *b)
 {
     // call askinput from board
-    r->askPositionInput();
+    r->askPositionInput(b);
     // call placeyourpiece function from the board
     b->placeYourPiece(r);
+    // call change turn from round here
 }

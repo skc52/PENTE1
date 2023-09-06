@@ -12,7 +12,8 @@ void Computer::makeMove(Round *r, Board *b)
 {
     // determine position from the strategy class
     // for now ask input for computer too,
-    r->askPositionInput();
+    r->askPositionInput(b);
     // call place your piece function from board
     b->placeYourPiece(r);
+    // call change turn from round here
 }

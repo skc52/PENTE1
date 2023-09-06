@@ -19,6 +19,8 @@ public:
     void showTotalScoresForBoth();
     void announceWinner();
     void displayScoresForAllRounds();
+    Player *getHuman();
+    Player *getComputer();
 
 private:
     Player *human;

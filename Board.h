@@ -18,15 +18,14 @@ public:
     Board();
 
     // Member functions
-    void resetBoard(); // done
-
+    void resetBoard();                                        // done
     bool placeYourPiece(Round *r);                            // done incomplete
     bool checkValidity();                                     // done
     bool checkAndCapture(Round *r, Player *p, Player *e);     // done
     bool checkForPairs(Player *p, Player *e, int dx, int dy); // dome
     bool capturePairs(Round *r, Player *p, int dx, int dy);   // done incomplete
-    bool checkForFive();                                      // done incomplete
-    int checkForFours(char piece);                            // this could be a function of strategy class... done
+    bool checkForFive(Round *r);                              // done incomplete
+    int checkForFours(Round *r, char piece);                  // this could be a function of strategy class... done
     void DisplayBoard(Round *r);                              // done incomplete
     bool parsePosition(const std::string &input);             // done
     void showComment(const std::string &comment);             // done

@@ -98,3 +98,13 @@ void Tournament::displayScoresForAllRounds()
         std::cout << "--------------------------------------------------------------------------------------------\n";
     }
 }
+
+Player *Tournament::getHuman()
+{
+    return human;
+}
+
+Player *Tournament::getComputer()
+{
+    return computer;
+}
