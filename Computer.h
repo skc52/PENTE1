@@ -10,7 +10,7 @@ public:
     Computer(const std::string &name);
 
     // Implement the pure virtual function
-    bool makeMove(Round *r, Board *b) override;
+    bool makeMove(Round *r, Board *b, ComputerStrategy *c) override;
 
     // Other member functions specific to the Computer player
 };

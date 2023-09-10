@@ -41,7 +41,7 @@ void Round::startRound(Tournament *t, Board *b)
     std::cout << "STARTING ROUND\n";
     b->resetBoard();
     // intialize white and black players
-    if (t->getRoundsCount() <= 1)
+    if (t->getRoundsCount() == 1 || t->getTotalScores(t->getHuman()) == t->getTotalScores(t->getComputer())) // if first round or scores are same, toos coin to determine starter
     {
         if (coinToss())
         { // on winning coin toss white will be human
@@ -56,15 +56,24 @@ void Round::startRound(Tournament *t, Board *b)
     }
     else
     {
-        currentPlayer = t->getPreviousWinner();
-        nextPlayer = t->getPreviousLoser();
+        if (t->getTotalScores(t->getHuman()) > t->getTotalScores(t->getComputer())) // else if scores are different, higher scorer is the starter
+        {
+            currentPlayer = t->getHuman();
+            nextPlayer = t->getComputer();
+        }
+        else
+        {
+            nextPlayer = t->getHuman();
+            currentPlayer = t->getComputer();
+        }
     }
+
     currentPlayer->setColor('W');
     nextPlayer->setColor('B');
     std::cout << currentPlayer->getName() << " is starting the game\n";
     // Place the piece in J10 (10, 10)
 
-    currentPlayer->makeMove(this, b);
+    currentPlayer->makeMove(this, b, nullptr);
 }
 
 void Round::changeTurn()

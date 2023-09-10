@@ -24,24 +24,24 @@ Tournament::~Tournament()
     }
 }
 
-void Tournament::setUpPlayers(Player *h, Player *c)
+void Tournament::setUpPlayers(Player* h, Player* c)
 {
     human = h;
     computer = c;
 }
 
-Round *Tournament::createANewRound()
+Round* Tournament::createANewRound()
 {
-    Round *r = new Round();
+    Round* r = new Round();
     this->rounds.push_back(r);
     return r;
 }
-Player *Tournament::getPreviousWinner()
+Player* Tournament::getPreviousWinner()
 {
     int ind = getRoundsCount() - 2;
     return rounds[ind]->getWinner();
 }
-Player *Tournament::getPreviousLoser()
+Player* Tournament::getPreviousLoser()
 {
     int ind = getRoundsCount() - 2;
     return rounds[ind]->getLoser();
@@ -50,12 +50,12 @@ int Tournament::getRoundsCount()
 {
     return rounds.size();
 }
-int Tournament::getTotalScores(Player *p)
+int Tournament::getTotalScores(Player* p)
 {
     int totalScore = 0;
     for (int i = 0; i < this->rounds.size(); i++)
     {
-        Round *r = rounds[i];
+        Round* r = rounds[i];
         totalScore += r->getPairsCapturedNum(p);
         totalScore += r->getFourConsecutivesNum(p);
         totalScore += r->getGamePoints(p);
@@ -83,7 +83,7 @@ void Tournament::announceWinner()
         winner = nullptr;
     }
 
-    if (!winner)
+    if (winner)
     {
         std::cout << winner->getName() << " won the tournament" << std::endl;
     }
@@ -99,12 +99,12 @@ void Tournament::displayScoresForAllRounds()
     {
         std::cout << "Round " << i + 1 << " scores" << std::endl;
         std::cout << human->getName() << " : "
-                  << "Pairs captured = " << rounds[i]->getPairsCapturedNum(human);
+            << "Pairs captured = " << rounds[i]->getPairsCapturedNum(human);
         std::cout << " Four consecutives = " << rounds[i]->getFourConsecutivesNum(human) << " Game Points " << rounds[i]->getGamePoints(human) << std::endl;
         std::cout << computer->getName() << " : "
-                  << "Pairs captured = " << rounds[i]->getPairsCapturedNum(computer);
+            << "Pairs captured = " << rounds[i]->getPairsCapturedNum(computer);
         std::cout << " Four consecutives = " << rounds[i]->getFourConsecutivesNum(computer) << " Game Points " << rounds[i]->getGamePoints(computer) << std::endl;
-        if (!rounds[i]->getWinner())
+        if (rounds[i]->getWinner())
         {
             std::cout << "ROUND WINNER " << rounds[i]->getWinner()->getName() << std::endl;
         }
@@ -116,12 +116,12 @@ void Tournament::displayScoresForAllRounds()
     }
 }
 
-Player *Tournament::getHuman()
+Player* Tournament::getHuman()
 {
     return human;
 }
 
-Player *Tournament::getComputer()
+Player* Tournament::getComputer()
 {
     return computer;
 }

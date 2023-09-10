@@ -25,14 +25,17 @@ public:
     bool checkForPairs(Player *p, Player *e, int dx, int dy); // dome
     bool capturePairs(Round *r, Player *p, int dx, int dy);   // done incomplete
     bool checkForFive(Round *r);                              // done incomplete
-    int checkForFours(Round *r, char piece);                  // this could be a function of strategy class... done
-    void DisplayBoard(Round *r);                              // done incomplete
-    bool parsePosition(const std::string &input);             // done
-    void showComment(const std::string &comment);             // done
+    int checkForFours(Round *r, char piece, Player *p);       // this could be a function of strategy class... done
+    int checkForFoursHorizontal(char piece);
+    int checkForFoursVertical(char piece);
+    void DisplayBoard(Round *r);                  // done incomplete
+    bool parsePosition(const std::string &input); // done
+    void showComment(const std::string &comment); // done
+    bool isWithinBounds(int row, int col);        // done
+    char getPiece(int row, int col);
 
 private:
     // Private helper functions
-    bool isWithinBounds(int row, int col); // done
 };
 
 #endif // BOARD_H

@@ -5,10 +5,10 @@
 class Human : public Player
 {
 public:
-    Human(const std::string &name);
+    Human(const std::string& name);
 
     // Implement the pure virtual function
-    bool makeMove(Round *r, Board *b) override;
+    bool makeMove(Round* r, Board* b, ComputerStrategy* c) override;
 
     // Other member functions specific to the Human player
 };

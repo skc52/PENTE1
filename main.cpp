@@ -45,13 +45,14 @@ void gameLoop(Round *r, Board *b, Tournament *t)
 {
     // start the round
     r->startRound(t, b);
+    b->DisplayBoard(r);
     bool gameEnded = false;
     while (!gameEnded)
     {
         r->changeTurn();
         // r->askPositionInput(b);
         // game won check?
-        if (!r->getCurrentPlayer()->makeMove(r, b))
+        if (!r->getCurrentPlayer()->makeMove(r, b, nullptr))
         {
             gameEnded = true;
         }

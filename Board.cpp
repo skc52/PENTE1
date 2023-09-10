@@ -60,7 +60,8 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
         if (checkAndCapture(r, r->getCurrentPlayer(), r->getNextPlayer()))
         {
             // count the fours and update in  round
-            checkForFours(r, r->getCurrentPlayer()->getColor());
+            checkForFours(r, r->getCurrentPlayer()->getColor(), r->getCurrentPlayer());
+            checkForFours(r, r->getNextPlayer()->getColor(), r->getNextPlayer());
             std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
             return false;
         }
@@ -68,7 +69,8 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
         // TODO: how to terminate the game
         if (checkForFive(r))
         { // if five consecutive return false to end the game loop
-            checkForFours(r, r->getCurrentPlayer()->getColor());
+            checkForFours(r, r->getCurrentPlayer()->getColor(), r->getCurrentPlayer());
+            checkForFours(r, r->getNextPlayer()->getColor(), r->getNextPlayer());
             std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
             return false;
         }
@@ -250,154 +252,175 @@ bool Board::checkForFive(Round *r)
 }
 
 // Member function to count the number of consecutive 4s throughout the board
-int Board::checkForFours(Round *r, char piece)
+int Board::checkForFours(Round *r, char piece, Player *p)
 {
-    // Implement this method to count consecutive 4 pieces
     int foursCount = 0;
 
     // Define directions: horizontal, vertical, and both diagonals
     int directions[4][2] = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
 
-    // start at the beginning of each row and calculate the number of consecutive 4s
+    // Iterate through rows and columns
     for (int i = 1; i < 20; i++)
     {
-        for (int j = 1; j < 16; j++)
-        { // 16 to prevent out of bounds, for columns more than 16 there wont be consecutive 4s starting at that point
+        for (int j = 1; j < 20; j++)
+        {
+            // Check in all directions
+            for (int d = 0; d < 4; d++)
+            {
+                bool consecutive4 = true;
+
+                // Check four consecutive pieces in the current direction
+                for (int k = 0; k < 4; k++)
+                {
+                    int newRow = i + k * directions[d][0];
+                    int newCol = j + k * directions[d][1];
+
+                    // Check if the indices are within bounds
+                    if (newRow >= 1 && newRow <= 19 && newCol >= 1 && newCol <= 19)
+                    {
+                        if (board[newRow][newCol] != piece)
+                        {
+                            consecutive4 = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        consecutive4 = false;
+                        break;
+                    }
+                }
+
+                if (consecutive4)
+                {
+                    foursCount++;
+                }
+            }
+        }
+    }
+    std::cout << "4 consecutives for " << p->getName() << " " << foursCount << std::endl;
+
+    r->setFourConsecutive(p, foursCount);
+
+    return foursCount;
+}
+
+int Board::checkForFoursHorizontal(char piece)
+{
+    int foursCount = 0;
+
+    // start from col = 1 for each row,
+    // move towards col = 20, finding 4 consecutives along the way
+    //  Iterate through rows
+    for (int i = 1; i < 20; i++)
+    {
+        for (int j = 1; j < 20 - 3; j++)
+        {
+            int k = 0;
             bool consecutive4 = true;
-            for (int k = 0; k < 4; k++)
+
+            while (consecutive4 == true)
             {
                 if (board[i][j + k] != piece)
                 {
                     consecutive4 = false;
-                    j += k;
                     break;
                 }
+                k++;
             }
-            if (consecutive4)
+            if (k == 4)
             {
                 foursCount++;
             }
+            // making sure that 4 more in a row is considered 1 four consecutive
+            // actually more than 4 only occurs during a game point.
+            // so dont consider that as a four consecutive.
+            // make k == 4 only as your checking solution
+            j += k;
         }
     }
+    std::cout << "Four foursHorizontal " << foursCount << std::endl;
 
-    // start at the beginning of each column and calculate the number of consecutive 4s
+    return foursCount;
+}
+
+int Board::checkForFoursVertical(char piece)
+{
+    int foursCount = 0;
+
+    // start from col = 1 for each row,
+    // move towards col = 20, finding 4 consecutives along the way
+    //  Iterate through rows
     for (int i = 1; i < 20; i++)
     {
-        for (int j = 1; j < 16; j++)
-        { // 16 to prevent out of bounds, for columns more than 16 there wont be consecutive 4s starting at that point
+        for (int j = 1; j < 20 - 3; j++)
+        {
+            int k = 0;
             bool consecutive4 = true;
-            for (int k = 0; k < 4; k++)
+
+            while (consecutive4 == true)
             {
                 if (board[j + k][i] != piece)
                 {
                     consecutive4 = false;
-                    j += k;
                     break;
                 }
+                k++;
             }
-            if (consecutive4)
+            if (k == 4)
             {
                 foursCount++;
             }
+            // making sure that 4 more in a row is considered 1 four consecutive
+            // actually more than 4 only occurs during a game point.
+            // so dont consider that as a four consecutive.
+            // make k == 4 only as your checking solution
+            j += k;
         }
     }
-
-    // iterate through forward diagonals formula:row+k, col+k
-    // starting column as 1 for each diagonal, start from row 16, and move your way up to row 1,
-    // start from 16 since there wont be consecutive4s starting after 16
-    for (int i = 16; i >= 1; i--)
-    { // row
-        for (int j = 1; j < 20 - i + 1; j++)
-        { // col
-            bool consecutive4 = true;
-            for (int k = 0; k < 4; k++)
-            {
-                if (board[i + k][j + k] != piece)
-                {
-                    consecutive4 = false;
-                    j += k;
-                    break;
-                }
-            }
-            if (consecutive4)
-            {
-                foursCount++;
-            }
-        }
-    }
-    // starting row as 1 for each diagonal, start from col2 since col1 is already covered above , and move right until col 16;
-    // upto 16 since there wont be consecutive4s starting after 16
-    for (int i = 2; i < 17; i++)
-    { // col
-        for (int j = 1; j < 20 - i + 1; j++)
-        { // row
-            bool consecutive4 = true;
-            for (int k = 0; k < 4; k++)
-            {
-                if (board[j + k][i + k] != piece)
-                {
-                    consecutive4 = false;
-                    j += k;
-                    break;
-                }
-            }
-            if (consecutive4)
-            {
-                foursCount++;
-            }
-        }
-    }
-
-    // iterate through backward diagonals formula:row-k, col+k
-
-    // iterate through the backward diagnols, starting from the bottom row upto row4
-    for (int i = 19; i >= 4; i--)
-    { // row
-        for (int j = 1; j <= i; j++)
-        { // col
-            bool consecutive4 = true;
-            for (int k = 0; k < 4; k++)
-            {
-                if (board[i - k][j + k] != piece)
-                {
-                    consecutive4 = false;
-                    j += k;
-                    break;
-                }
-            }
-            if (consecutive4)
-            {
-                foursCount++;
-            }
-        }
-    }
-
-    // iterate through the backward diagnols, starting from the col 2 upto col 16
-    for (int i = 2; i < 17; i++)
-    { // col
-        for (int j = 2; j < 20 - i + 1; j++)
-        { // row
-            bool consecutive4 = true;
-            for (int k = 0; k < 4; k++)
-            {
-                if (board[j - k][i + k] != piece)
-                {
-                    consecutive4 = false;
-                    j += k;
-                    break;
-                }
-            }
-            if (consecutive4)
-            {
-                foursCount++;
-            }
-        }
-    }
-
-    r->setFourConsecutive(r->getCurrentPlayer(), foursCount);
+    std::cout << "Four foursHorizontal " << foursCount << std::endl;
 
     return foursCount;
 }
+
+// int Board::checkForFoursForwardDiagonal(char piece)
+// {
+//     int foursCount = 0;
+
+//     // start from col = 1 for each row,
+//     // move towards col = 20, finding 4 consecutives along the way
+//     //  Iterate through rows
+//     for (int i = 1; i < 20; i++)
+//     {
+//         for (int j = 1; j < 20 - 3; j++)
+//         {
+//             int k = 0;
+//             bool consecutive4 = true;
+
+//             while (consecutive4 == true)
+//             {
+//                 if (board[i + k][j + k] != piece)
+//                 {
+//                     consecutive4 = false;
+//                     break;
+//                 }
+//                 k++;
+//             }
+//             if (k == 4)
+//             {
+//                 foursCount++;
+//             }
+//             // making sure that 4 more in a row is considered 1 four consecutive
+//             // actually more than 4 only occurs during a game point.
+//             // so dont consider that as a four consecutive.
+//             // make k == 4 only as your checking solution
+//             j += k;
+//         }
+//     }
+//     std::cout << "Four foursHorizontal " << foursCount << std::endl;
+
+//     return foursCount;
+// }
 
 // Member function to display the board
 void Board::DisplayBoard(Round *r)
@@ -490,4 +513,9 @@ bool Board::isWithinBounds(int row, int col)
 {
     // Implement this method to check if the position is within bounds
     return row >= 1 && row <= 19 && col >= 1 && col <= 19;
+}
+
+char Board::getPiece(int row, int col)
+{
+    return board[row][col];
 }

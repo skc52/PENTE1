@@ -9,10 +9,14 @@
 // Implementation of Human class
 Human::Human(const std::string &name) : Player(name) {}
 
-bool Human::makeMove(Round *r, Board *b)
+bool Human::makeMove(Round *r, Board *b, ComputerStrategy *c)
 {
     // call askinput from board
-    r->askPositionInput(b);
+    // call askinput from board
+    if (r->getTurnNum() != 0)
+    {
+        r->askPositionInput(b);
+    }
     // call placeyourpiece function from the board
     return b->placeYourPiece(r);
     // call change turn from round here

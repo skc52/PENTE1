@@ -1,0 +1,30 @@
+This file contains all possible scenarios and assigns them priorities
+
+Lets just talk about horizontal scan for the sake of simplicity of the program
+
+That too one row
+
+0, W, W, B, 0, W, W, W, 0, W, B, B, B, 0
+
+Now, scan this row in -> direction, and come up with consecutiveCount for own
+A) 0, 1, 2, 0, 0, 1, 2, 3, 0, 1, 0, 0, 0, 0
+
+Now, do the same for enemy
+B) 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0
+
+Now, go through the row again, and this time we will be considering only empty cell,
+for every empty cell:
+    in the corresponding position in A, look at its right and left neighbors,
+    determine the priority for that cell, based on the friend increment rules
+    look in the corresponding position in B, look at its right and left neihbors,
+    determine the priority for that cell, based on the enemy counter rules
+
+    compare those two priorities for that cell and assign the max one for that cell.
+    if the empty cell already had a priority assigned to it, compare it with the priorities above and
+    set it to the max priority
+
+We can employ the same algorithm for every direction
+
+once we are done with determining final priorities for each cell:
+    expand out from J10 to all possible directions and get the maximum priority position
+    if there are more than one maximum priority , the one closer to the center will be returned as the best position
