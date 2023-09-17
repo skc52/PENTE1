@@ -1,3 +1,4 @@
+#pragma once
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -18,9 +19,10 @@ public:
     Board();
 
     // Member functions
-    void resetBoard();                                        // done
-    bool placeYourPiece(Round *r);                            // done incomplete
-    bool checkValidity();                                     // done
+    void resetBoard();             // done
+    bool placeYourPiece(Round *r); // done incomplete
+    bool checkValidity();          // done
+
     bool checkAndCapture(Round *r, Player *p, Player *e);     // done
     bool checkForPairs(Player *p, Player *e, int dx, int dy); // dome
     bool capturePairs(Round *r, Player *p, int dx, int dy);   // done incomplete
@@ -33,6 +35,7 @@ public:
     void showComment(const std::string &comment); // done
     bool isWithinBounds(int row, int col);        // done
     char getPiece(int row, int col);
+    void setPiece(int row, int col, char c);
 
 private:
     // Private helper functions

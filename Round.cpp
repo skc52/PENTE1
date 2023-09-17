@@ -6,10 +6,143 @@
 #include <ctime>
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 
 Round::Round()
 {
     this->currentTurnNum = 0;
+}
+void Round::loadRound(std::string filename, Player *human, Player *computer, Tournament *t)
+{
+    int hCapturedPairs = 0, hScore = 0;
+    int cCapturedPairs = 0, cScore = 0;
+    std::string currPlayer;
+    std::string currColor;
+    // read from the file captured pairs and scores of human and computer
+
+    std::ifstream inputFile(filename);
+
+    if (!inputFile.is_open())
+    {
+        std::cerr << "Error opening the file." << std::endl;
+        return;
+    }
+
+    if (!inputFile.is_open())
+    {
+        std::cerr << "Error opening the file." << std::endl;
+        return;
+    }
+
+    // Find and skip the "Human:" line
+    std::string line;
+    // Read and parse lines until "Human:" is found
+    while (std::getline(inputFile, line))
+    {
+        if (line.find("Human:") != std::string::npos)
+        {
+            std::getline(inputFile, line);
+            size_t pos = line.find("Captured pairs:");
+            if (pos != std::string::npos)
+            {
+                hCapturedPairs = std::stoi(line.substr(pos + 15));
+            }
+
+            std::getline(inputFile, line);
+            pos = line.find("Score:");
+            if (pos != std::string::npos)
+            {
+                hScore = std::stoi(line.substr(pos + 6));
+            }
+
+            break;
+        }
+    }
+
+    // Read and parse lines until "Computer:" is found
+    while (std::getline(inputFile, line))
+    {
+        if (line.find("Computer:") != std::string::npos)
+        {
+            std::getline(inputFile, line);
+            size_t pos = line.find("Captured pairs:");
+            if (pos != std::string::npos)
+            {
+                cCapturedPairs = std::stoi(line.substr(pos + 15));
+            }
+
+            std::getline(inputFile, line);
+            pos = line.find("Score:");
+            if (pos != std::string::npos)
+            {
+                cScore = std::stoi(line.substr(pos + 6));
+            }
+
+            break;
+        }
+    }
+
+    // Read and parse lines until "Next Player:" is found
+    while (std::getline(inputFile, line))
+    {
+        if (line.find("Next Player:") != std::string::npos)
+        {
+            size_t colonPos = line.find(':');
+            if (colonPos != std::string::npos)
+            {
+                std::string playerInfo = line.substr(colonPos + 2);
+                size_t hyphenPos = playerInfo.find('-');
+                if (hyphenPos != std::string::npos)
+                {
+                    currPlayer = playerInfo.substr(0, hyphenPos - 1);
+                    currColor = playerInfo.substr(hyphenPos + 2);
+                }
+            }
+
+            break;
+        }
+    }
+
+    inputFile.close();
+
+    //--------------------------------------------------------------------------
+    setPairsCapturedNum(human, hCapturedPairs);
+    setPairsCapturedNum(computer, cCapturedPairs);
+
+    t->setTotalScore(hScore, cScore);
+
+    // also get the current and next player and their colors
+    if (currPlayer == "Human")
+    {
+        currentPlayer = computer; // the reason i am setting current player as computer even though currPlayer reads Human
+        // is in Pente.cpp, it changes turn as soon as the game loads up. so even tho it should be human's turn, computer plays first
+        // that is why i set the currentPlayer as enemy, so it changes turn and switched to human
+        // i have setTurnNum to turnNum -1 for this exact reason.
+        nextPlayer = human;
+    }
+    else
+    {
+        currentPlayer = human;
+        nextPlayer = computer;
+    }
+    if (currColor == "White")
+    {
+        currentPlayer->setColor('B');
+        nextPlayer->setColor('W');
+    }
+    else
+    {
+        currentPlayer->setColor('W');
+        nextPlayer->setColor('B');
+    }
+
+    // determine the turn number
+    //  a captured pair is 2 moves
+    //  get the count of all the non zero characters in the board
+    int turnNum = getTurnNum();
+    turnNum = turnNum + hCapturedPairs * 2 + cCapturedPairs * 2;
+    setTurnNum(turnNum - 1);
 }
 bool Round::coinToss()
 {
@@ -73,7 +206,7 @@ void Round::startRound(Tournament *t, Board *b)
     std::cout << currentPlayer->getName() << " is starting the game\n";
     // Place the piece in J10 (10, 10)
 
-    currentPlayer->makeMove(this, b, nullptr);
+    currentPlayer->makeMove(this, b, nullptr, t);
 }
 
 void Round::changeTurn()
@@ -91,6 +224,11 @@ int Round::getTurnNum()
     return currentTurnNum;
 }
 
+void Round::setTurnNum(int num)
+{
+    currentTurnNum = num;
+}
+
 void Round::incrementTurnNum()
 {
     // Implementation for incrementTurnNum
@@ -98,7 +236,7 @@ void Round::incrementTurnNum()
     this->currentTurnNum += 1;
 }
 
-void Round::askPositionInput(Board *b)
+bool Round::askPositionInput(Board *b, Player *human, Player *computer, Tournament *t) // false means the game has ended...possibly quitted by human player
 {
     // Implementation for askPositionInput
     bool isValidPos = false;
@@ -106,13 +244,20 @@ void Round::askPositionInput(Board *b)
     while (!isValidPos)
     {
         std::cout << "Enter the intersection you want to put your piece in. Follow the format A10, B2, K16.\n";
-        std::cout << "Else, enter H for suggestion\n";
+        std::cout << "Else, enter H for suggestion. Enter SAVE to save and quit your game\n";
         std::cin >> position;
+        if (position == "SAVE")
+        {
+            // TODO
+            saveGameToFile(b, human, computer, t);
+            return false;
+        }
         if (!b->parsePosition(position))
             continue;
         isValidPos = b->checkValidity();
     }
     std::cout << "You entered\n";
+    return true;
 }
 
 int Round::getPairsCapturedNum(Player *p)
@@ -160,6 +305,11 @@ void Round::setPairsCapturedNum(Player *p)
     pairsCaptured[p] += 1;
 }
 
+void Round::setPairsCapturedNum(Player *p, int captureCount)
+{
+    pairsCaptured[p] = captureCount;
+}
+
 void Round::setFourConsecutive(Player *p, int foursCount)
 {
     // Implementation for setFourConsecutive
@@ -175,8 +325,8 @@ void Round::setGamePoints(Player *p)
 {
     // Implementation for setGamePoints
     gamePoints[p] = 5;
-    winnerOfTheRound = currentPlayer;
-    loserOFTheRound = nextPlayer;
+    winnerOfTheRound = p;
+    loserOFTheRound = p == currentPlayer ? nextPlayer : currentPlayer;
 }
 
 void Round::announceWinnerOfTheRound()
@@ -245,4 +395,49 @@ Player *Round::getLoser()
 {
     // Implementation for getWinner
     return loserOFTheRound;
+}
+
+void Round::saveGameToFile(Board *b, Player *human, Player *computer, Tournament *t)
+{
+    // ask the name for the txt file
+    std::string fileName;
+    std::cout << "Enter the name for a file for this game to be saved\n";
+    std::cin >> fileName;
+    // save the board into the txt file
+    std::ofstream outputFile(fileName + ".txt");
+
+    if (outputFile.is_open())
+    {
+        outputFile << "Board:" << std::endl;
+        for (int i = 1; i < 20; i++)
+        {
+            for (int j = 1; j < 20; j++)
+            {
+                outputFile << b->getPiece(i, j);
+            }
+            outputFile << std::endl;
+        }
+        outputFile << "Human: " << std::endl;
+        outputFile << "Captured pairs: " << getPairsCapturedNum(human) << std::endl;
+        outputFile << "Score: " << t->getTotalScores(human) << std::endl
+                   << std::endl;
+
+        outputFile << "Computer: " << std::endl;
+        outputFile << "Captured pairs: " << getPairsCapturedNum(computer) << std::endl;
+        outputFile << "Score: " << t->getTotalScores(computer) << std::endl
+                   << std::endl;
+
+        // everytime human saves the game, so when he is saving and quitting the game he cannot place any moves, so it is always
+        // his turn when he loads up a game
+        std::string colorNext = currentPlayer->getColor() == 'W' ? "White" : "Black";
+        outputFile << "Next Player: Human - " << colorNext << std::endl;
+        outputFile.close();
+        std::cout << "File written successfully." << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error opening the file." << std::endl;
+    }
+
+    // save the stats into the txt file
 }

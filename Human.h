@@ -1,3 +1,4 @@
+#pragma once
 #ifndef HUMAN_H
 #define HUMAN_H
 #include "Player.h"
@@ -5,10 +6,10 @@
 class Human : public Player
 {
 public:
-    Human(const std::string& name);
+    Human(const std::string &name);
 
     // Implement the pure virtual function
-    bool makeMove(Round* r, Board* b, ComputerStrategy* c) override;
+    bool makeMove(Round *r, Board *b, ComputerStrategy *c, Tournament *t) override;
 
     // Other member functions specific to the Human player
 };

@@ -65,6 +65,7 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
             std::cout << r->getCurrentPlayer()->getName() << " won the game\n";
             return false;
         }
+
         // also checks for 5 consecutive pieces, if so game terminates
         // TODO: how to terminate the game
         if (checkForFive(r))
@@ -189,10 +190,10 @@ bool Board::capturePairs(Round *r, Player *p, int dx, int dy) // returns true if
 
     // TODO update scores for players
     r->setPairsCapturedNum(p);
-    //  TODO captured pair == 5, game won, announce winner, closing stats, checkforfours
+    //  TODO captured pair == 5, game ended, announce winner, closing stats, checkforfours
     if (r->getPairsCapturedNum(p) == 5)
     {
-        r->setGamePoints(p);
+        // r->setGamePoints(p);
         r->announceWinnerOfTheRound();
         return true;
     }
@@ -438,7 +439,14 @@ void Board::DisplayBoard(Round *r)
         }
         for (int j = 1; j < 20; j++)
         {
-            std::cout << board[i][j] << " ";
+            if (board[i][j] == '0')
+            {
+                std::cout << "- ";
+            }
+            else
+            {
+                std::cout << board[i][j] << " ";
+            }
         }
         std::cout << std::endl;
     }
@@ -454,6 +462,7 @@ void Board::DisplayBoard(Round *r)
 bool Board::parsePosition(const std::string &input)
 {
     // Implement this method to parse the input into row and column indices
+
     if ((input.size() == 1 && tolower(input[0]) != 'h') && input.size() > 3)
     {
         showComment("Invalid Input");
@@ -518,4 +527,9 @@ bool Board::isWithinBounds(int row, int col)
 char Board::getPiece(int row, int col)
 {
     return board[row][col];
+}
+
+void Board::setPiece(int row, int col, char c)
+{
+    board[row][col] = c;
 }

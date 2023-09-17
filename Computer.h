@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COMPUTER_H
 #define COMPUTER_H
 #include "Player.h"
@@ -10,7 +11,7 @@ public:
     Computer(const std::string &name);
 
     // Implement the pure virtual function
-    bool makeMove(Round *r, Board *b, ComputerStrategy *c) override;
+    bool makeMove(Round *r, Board *b, ComputerStrategy *c, Tournament *t) override;
 
     // Other member functions specific to the Computer player
 };
