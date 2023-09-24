@@ -8,45 +8,18 @@
 ComputerStrategy::ComputerStrategy(Tournament *t)
 {
     this->t = t;
-
-    reasons[1] = "";
-    reasons[2] = "Start a consecutive";
-    reasons[2] = "Stop opponent Start a consecutive";
-    reasons[3] = "";
-    reasons[4] = "Create a 4 consecutive";
-    reasons[-4] = "Stop opponent Create a 4 consecutive";
-    reasons[5] = "";
-    reasons[6] = "End the game by capturing pairs. Already winning";
-    reasons[-6] = "Stop Opponent end the game by capturing pairs. Opponent's already winning";
-    reasons[7] = "";
-    reasons[8] = "End the game by capturing pairs. Already winning by vast difference";
-    reasons[-8] = "Stop Opponent end the game by capturing pairs. Opponent's already winning by vast difference";
-    reasons[9] = "End game with 5 consecutive. Winning and with this it will further widen the score gap ";
-    reasons[-9] = "Stop opponent End game with 5 consecutive. Opponent's Winning and with this it will further widen the score gap ";
-    reasons[10] = "Have a 4 consecutive";
-    reasons[-10] = "Stop opponent Have a 4 consecutive";
-    reasons[11] = "Capture a pair";
-    reasons[-11] = "Prevent opponent capture pair";
-    reasons[12] = "Capture multiple pairs.";
-    reasons[-12] = "Stop opponent Capture multiple pairs.";
-    reasons[13] = "Have mutiple 4 consecutives";
-    reasons[-13] = "Stop opponent Have mutiple 4 consecutives";
-    reasons[14] = "End game with 5 consecutive. Losing so that 5 game points will only lessen the score difference ";
-    reasons[-14] = "Stop opponent End game with 5 consecutive. Opponent's Losing so that 5 game points will only lessen the score difference ";
-    reasons[15] = "Have a tessera formation. Tessera is a 4 consecutive with both ends open. Can end the game for sure!";
-    reasons[-15] = "Stop opponent Have a tessera formation. Tessera is a 4 consecutive with both ends open. Can end the game for sure!";
 }
 
 std::pair<int, std::string> ComputerStrategy::calculateConsecutivesPriority(int row, int col, Board *board, Player *computerPlayer)
 {
     std::pair<int, std::string> priorityPair; // TODO
     int priority = 0;
-    std::string reason = "Create chances of consecutives in ";
+    std::string reason = "Create chances of consecutives ";
     std::string tailToReason; // will store the direction for the reason
     // Define directions for checking consecutive pieces
     int dx[] = {1, 0, 1, 1}; // Right, Down, Backward Diagonal, Forward Diagonal
     int dy[] = {0, 1, 1, -1};
-    std::string dirName[] = {"Row", "Col", "Forward Diagonal", "Backward Diagonal"};
+    std::string dirName[] = {"Col", "Row", "Backward Diagonal", "Forward Diagonal"};
 
     // Iterate through each direction
     for (int direction = 0; direction < 4; ++direction)
@@ -84,9 +57,11 @@ std::pair<int, std::string> ComputerStrategy::calculateConsecutivesPriority(int 
                 }
             }
 
-            if (emptyCount + ownPiecesCount == 4)
+            // looking for a chance of consecutive...not necessarily for consecutives
+            if (emptyCount + ownPiecesCount == 4 && ownPiecesCount != 3)
             {
-                priority = std::max(priority, 2 * ownPiecesCount); // at most 4
+                priority = std::max(priority, ownPiecesCount); // at most 2
+                reason = dirName[direction];
             }
         }
 
@@ -121,9 +96,10 @@ std::pair<int, std::string> ComputerStrategy::calculateConsecutivesPriority(int 
                 }
             }
 
-            if (emptyCount + ownPiecesCount == 4)
+            if (emptyCount + ownPiecesCount == 4 && ownPiecesCount != 3)
             {
-                priority = std::max(priority, 2 * ownPiecesCount); // at most 4
+                priority = std::max(priority, ownPiecesCount);
+                reason = dirName[direction];
             }
         }
         // Consider the empty space at position 2 of the 4 consecutive
@@ -175,12 +151,13 @@ std::pair<int, std::string> ComputerStrategy::calculateConsecutivesPriority(int 
                     }
                 }
             }
-
-            if (emptyCount + ownPiecesCount == 2)
+            // looking for a chance of consecutives, not necessarily consecutives
+            if (emptyCount + ownPiecesCount == 1)
             {
 
                 int totalPiecesCount = ownPiecesCount + prevOwnPiecesCount;
-                priority = std::max(priority, 2 * totalPiecesCount); // at most 4
+                priority = std::max(priority, totalPiecesCount); // at most 2
+                reason = dirName[direction];
             }
         }
 
@@ -233,10 +210,11 @@ std::pair<int, std::string> ComputerStrategy::calculateConsecutivesPriority(int 
                 }
             }
 
-            if (emptyCount + ownPiecesCount == 2)
+            if (emptyCount + ownPiecesCount == 1)
             {
                 int totalPiecesCount = ownPiecesCount + prevOwnPiecesCount;
-                priority = std::max(priority, 2 * totalPiecesCount); // at most 4
+                priority = std::max(priority, totalPiecesCount); // at most 2
+                reason = dirName[direction];
             }
         }
     }
@@ -254,7 +232,7 @@ std::pair<int, std::string> ComputerStrategy::calculateCapturePairsPriority(int 
     // Define directions for checking consecutive pieces
     int dx[] = {1, 0, 1, 1}; // Right, Down,Backward Diagonal, Forward DIagonal
     int dy[] = {0, 1, 1, -1};
-    std::string dirName[] = {"Row", "Col", "Forward Diagonal", "Backward Diagonal"};
+    std::string dirName[] = {"Col", "Row", "Backward Diagonal", "Forward Diagonal"};
     // Iterate through each direction
     char enemyPiece = computerPlayer->getColor() == 'W' ? 'B' : 'W';
     int sureCaptureCount = 0; // stores the number of captures from that empty position
@@ -324,34 +302,34 @@ std::pair<int, std::string> ComputerStrategy::calculateCapturePairsPriority(int 
             {
                 sureCaptureCount++;
                 reason = reason + "Capture a pair to right " + dirName[direction] + ". ";
-                if (r->getPairsCapturedNum(computerPlayer) < 4)
-                {
-                    priority = std::max(priority, 10);
-                }
+                // if (r->getPairsCapturedNum(computerPlayer) < 4) {
+                //     priority = std::max(priority, 10);
+                // }
 
-                if (r->getPairsCapturedNum(computerPlayer) == 4)
-                {
+                // if (r->getPairsCapturedNum(computerPlayer) == 4)
+                //{
+                //
+                //     Player* opponent = r->getCurrentPlayer() == computerPlayer ? r->getNextPlayer() : computerPlayer;
+                //     int opponentScore = t->getTotalScores(opponent);
+                //     int ownScore = t->getTotalScores(computerPlayer);
+                //     if ((opponentScore - ownScore) > 0) //if opponent is winning by more than 1 points then we do not want to end the game just yet by capturing
+                //         //because we wont be able to win with that
+                //     {
+                //         priority = std::max(priority, 1);
+                //     }
+                //     else
+                //     {
 
-                    Player *opponent = r->getCurrentPlayer() == computerPlayer ? r->getNextPlayer() : computerPlayer;
-                    int opponentScore = t->getTotalScores(opponent);
-                    int ownScore = t->getTotalScores(computerPlayer);
-                    if ((opponentScore - ownScore) > 0) // if opponent is winning by more than 1 points then we do not want to end the game just yet by capturing
-                                                        // because we wont be able to win with that
-                    {
-                        priority = std::max(priority, 1);
-                    }
-                    else
-                    {
+                //        /*if ((ownScore - opponentScore) > 3) {
+                //            priority = std::max(priority, 8);
+                //        }
+                //        else {
+                //            priority = std::max(priority, 6);
+                //        }*/
+                //        priority = std::max(priority, 8);
 
-                        /*if ((ownScore - opponentScore) > 3) {
-                            priority = std::max(priority, 8);
-                        }
-                        else {
-                            priority = std::max(priority, 6);
-                        }*/
-                        priority = std::max(priority, 8);
-                    }
-                }
+                //    }
+                //}
             }
             else
             {
@@ -476,9 +454,10 @@ std::pair<int, std::string> ComputerStrategy::calculatePriorityWith4Consectuives
     // Define directions for checking consecutive pieces
     int dx[] = {1, 0, 1, 1}; // Right, Down, Backward Diagonal, Forward Diagonal
     int dy[] = {0, 1, 1, -1};
-    std::string dirName[] = {"Row", "Col", "Forward Diagonal", "Backward Diagonal"};
+    std::string dirName[] = {"Col", "Row", "Backward Diagonal", "Forward Diagonal"};
     int sure4ConsCount = 0;
     bool tessera = false;
+    int tesseraCount = 0;
     // Iterate through each direction
     for (int direction = 0; direction < 4; ++direction)
     {
@@ -526,6 +505,7 @@ std::pair<int, std::string> ComputerStrategy::calculatePriorityWith4Consectuives
                 board->getPiece(row + dx[direction] * (rightCount + 1), col + dy[direction] * (rightCount + 1)) == '0')
             {
                 tessera = true;
+                tesseraCount++;
             }
         }
     }
@@ -533,7 +513,7 @@ std::pair<int, std::string> ComputerStrategy::calculatePriorityWith4Consectuives
     priority = sure4ConsCount * 10;
     if (tessera)
     {
-        priority += 10;
+        priority += tesseraCount * 10;
         reason = reason + "Have Tessera Formation.";
     }
     if (r->getCurrentPlayer() != computerPlayer)
@@ -550,6 +530,188 @@ std::pair<int, std::string> ComputerStrategy::calculateOpponentPriorityWith4Cons
     return calculatePriorityWith4Consectuives(row, col, board, opponentPlayer, r);
 }
 
+std::pair<int, std::string> ComputerStrategy::calculatePriorityWith3Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r)
+{
+    int priority = 0;
+    std::string reason = "";
+    // Define directions for checking consecutive pieces
+    int dx[] = {1, 0, 1, 1}; // Right, Down, Backward Diagonal, Forward Diagonal
+    int dy[] = {0, 1, 1, -1};
+    std::string dirName[] = {"Col", "Row", "Backward Diagonal", "Forward Diagonal"};
+    int sure3ConsCount = 0;
+    bool oneOpenEnd = false, bothOpenEnds = false;
+    // Iterate through each direction
+    for (int direction = 0; direction < 4; ++direction)
+    {
+
+        bool isConsecutive = true;
+        int leftCount = 0;
+        int rightCount = 0;
+        // determine consecutive count in left side
+        while (isConsecutive)
+        {
+            int newRow = row - dx[direction] * (leftCount + 1);
+            int newCol = col - dy[direction] * (leftCount + 1);
+            if (board->isWithinBounds(newRow, newCol) && board->getPiece(newRow, newCol) == computerPlayer->getColor())
+            {
+                leftCount++;
+            }
+            else
+            {
+                isConsecutive = false;
+            }
+        }
+        isConsecutive = true;
+        // determine consecutive count in right side
+        while (isConsecutive)
+        {
+            int newRow = row + dx[direction] * (rightCount + 1);
+            int newCol = col + dy[direction] * (rightCount + 1);
+            if (board->isWithinBounds(newRow, newCol) && board->getPiece(newRow, newCol) == computerPlayer->getColor())
+            {
+                rightCount++;
+            }
+            else
+            {
+                isConsecutive = false;
+            }
+        }
+
+        if (leftCount + rightCount == 2)
+        {
+            // sure 3 consecutive
+            sure3ConsCount++;
+
+            // check for possibility of growing into 4 in either side
+
+            if (board->getPiece(row - dx[direction] * (leftCount + 1), col - dy[direction] * (leftCount + 1)) == '0' &&
+                board->getPiece(row + dx[direction] * (rightCount + 1), col + dy[direction] * (rightCount + 1)) == '0')
+            {
+                reason = reason + "Have 3 consecutive in " + dirName[direction] + " with both ends open, ";
+                bothOpenEnds = true;
+            }
+            else if (board->getPiece(row - dx[direction] * (leftCount + 1), col - dy[direction] * (leftCount + 1)) == '0')
+            {
+                reason = reason + "Have 3 consecutive in " + dirName[direction] + " with one open end, ";
+                oneOpenEnd = true;
+            }
+            else if (board->getPiece(row + dx[direction] * (rightCount + 1), col + dy[direction] * (rightCount + 1)) == '0')
+            {
+                reason = reason + "Have 3 consecutive in " + dirName[direction] + " with one open end, ";
+                oneOpenEnd = true;
+            }
+        }
+    }
+
+    if (oneOpenEnd)
+    {
+        priority = sure3ConsCount * 4;
+    }
+    if (bothOpenEnds)
+    {
+        priority = sure3ConsCount * 6;
+    }
+    if (r->getCurrentPlayer() != computerPlayer)
+    {
+        reason = "Stop opponent " + reason;
+    }
+    return {priority, reason};
+}
+
+std::pair<int, std::string> ComputerStrategy::calculateOpponentPriorityWith3Consectuives(int row, int col, Board *board, Player *opponentPlayer, Round *r)
+{
+    return calculatePriorityWith3Consectuives(row, col, board, opponentPlayer, r);
+}
+
+std::pair<int, std::string> ComputerStrategy::calculatePriorityWith2Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r)
+{
+    int priority = 0;
+    std::string reason = "";
+    // Define directions for checking consecutive pieces
+    int dx[] = {1, 0, 1, 1}; // Right, Down, Backward Diagonal, Forward Diagonal
+    int dy[] = {0, 1, 1, -1};
+    std::string dirName[] = {"Col", "Row", "Backward Diagonal", "Forward Diagonal"};
+    int sure3ConsCount = 0;
+    bool possibleCapture = false, bothOpenEnds = false;
+    // Iterate through each direction
+    for (int direction = 0; direction < 4; ++direction)
+    {
+
+        bool isConsecutive = true;
+        int leftCount = 0;
+        int rightCount = 0;
+        // determine consecutive count in left side
+        while (isConsecutive)
+        {
+            int newRow = row - dx[direction] * (leftCount + 1);
+            int newCol = col - dy[direction] * (leftCount + 1);
+            if (board->isWithinBounds(newRow, newCol) && board->getPiece(newRow, newCol) == computerPlayer->getColor())
+            {
+                leftCount++;
+            }
+            else
+            {
+                isConsecutive = false;
+            }
+        }
+        isConsecutive = true;
+        // determine consecutive count in right side
+        while (isConsecutive)
+        {
+            int newRow = row + dx[direction] * (rightCount + 1);
+            int newCol = col + dy[direction] * (rightCount + 1);
+            if (board->isWithinBounds(newRow, newCol) && board->getPiece(newRow, newCol) == computerPlayer->getColor())
+            {
+                rightCount++;
+            }
+            else
+            {
+                isConsecutive = false;
+            }
+        }
+
+        if (leftCount + rightCount == 1)
+        {
+            // sure 3 consecutive
+            sure3ConsCount++;
+
+            // check for possibility of growing into 4 in either side, if one side is blocked by enemy, then dont put there
+
+            if (board->getPiece(row - dx[direction] * (leftCount + 1), col - dy[direction] * (leftCount + 1)) == '0' &&
+                board->getPiece(row + dx[direction] * (rightCount + 1), col + dy[direction] * (rightCount + 1)) == '0')
+            {
+                reason = reason + "Have 2 consecutive in " + dirName[direction] + " with both ends open, ";
+                bothOpenEnds = true;
+            }
+            else if (board->getPiece(row - dx[direction] * (leftCount + 1), col - dy[direction] * (leftCount + 1)) == '0')
+            {
+                possibleCapture = true;
+            }
+            else if (board->getPiece(row + dx[direction] * (rightCount + 1), col + dy[direction] * (rightCount + 1)) == '0')
+            {
+                possibleCapture = true;
+            }
+        }
+    }
+
+    // if both ends are open
+    // possibleCapture will be true if for any direction from that position, it leads to its capture
+    if (!possibleCapture && bothOpenEnds)
+    {
+        priority = sure3ConsCount * 2;
+    }
+    if (r->getCurrentPlayer() != computerPlayer)
+    {
+        reason = "Stop opponent " + reason;
+    }
+    return {priority, reason};
+}
+
+std::pair<int, std::string> ComputerStrategy::calculateOpponentPriorityWith2Consectuives(int row, int col, Board *board, Player *opponentPlayer, Round *r)
+{
+    return calculatePriorityWith2Consectuives(row, col, board, opponentPlayer, r);
+}
+
 std::pair<int, std::string> ComputerStrategy::calculateEndGamePriorityWith5Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r)
 {
 
@@ -558,7 +720,7 @@ std::pair<int, std::string> ComputerStrategy::calculateEndGamePriorityWith5Conse
     // Define directions for checking capture pairs
     int dx[] = {1, 0, 1, 1}; // Right, Down,Backward Diagonal, Forward DIagonal
     int dy[] = {0, 1, 1, -1};
-    std::string dirName[] = {"Row", "Col", "Forward Diagonal", "Backward Diagonal"};
+    std::string dirName[] = {"Col", "Row", "Backward Diagonal", "Forward Diagonal"};
     int fiveConsCount = 0;
     // Iterate through each direction
     for (int direction = 0; direction < 4; ++direction)
@@ -610,16 +772,25 @@ std::pair<int, std::string> ComputerStrategy::calculateEndGamePriorityWith5Conse
             int ownScore = t->getTotalScores(computerPlayer);
 
             reason = reason + " Have 5 consecutives in " + dirName[direction] + ". ";
-            if ((opponentScore - ownScore) > 3)
+            // if you are winning by major difference then not that important...delay winning
+            if ((ownScore - opponentScore) > 5)
             {
-                priority = std::max(priority, 15);
+
+                // the max consecutive there can be is 9, and winning by having 9 consecutive is a great loss,
+                // as we wont be able to get points for two 4 consecutives, 9 = 4_4
+                if (leftCount + rightCount >= 8)
+                {
+                    priority = std::max(priority, 4);
+                }
+                else
+                {
+                    priority = std::max(priority, 8);
+                }
             }
 
-            // case when you are winning
-            // you may wanna delay and try to get more points
             else
             {
-                priority = std::max(priority, 8);
+                priority = std::max(priority, 20);
             }
         }
     }
@@ -658,55 +829,6 @@ std::pair<int, std::string> ComputerStrategy::calculateCaptureRiskPriority(int r
     return calculateCapturePairsPriority(row, col, board, humanPlayer, r, false);
 }
 
-// std::pair<int, std::string> ComputerStrategy::calculateSettingYourselfUpForCapture(int row, int col, Board* board, Player* computerPlayer, Player* humanPlayer, Round* r)
-//{
-//     //see if by placing your piece there you are setting yourself for capture or not
-//     //consider 2 or 3 position
-//     //check for 1 and 4 positions for enemy pieces
-//     int priority = 0;
-//     std::string reason = "will get captured, so avoid it";
-//     // Define directions for checking capture pairs
-//     int dx[] = { 1, 0, 1, 1 }; // Right, Down,Backward Diagonal, Forward DIagonal
-//     int dy[] = { 0, 1, 1, -1 };
-//     std::string dirName[] = { "Row", "Col", "Forward Diagonal", "Backward Diagonal" };
-//
-//     for (int direction = 0; direction < 4; direction++) {
-//         //empty position is in 2nd position
-//         //E_P_
-//         if (board->isWithinBounds(row - dx[direction], col - dy[direction]) && board->getPiece(row - dx[direction], col - dy[direction]) == enemyPiece &&
-//             board->isWithinBounds(row + dx[direction], col + dy[direction]) && board->getPiece(row + dx[direction], col + dy[direction]) == ownPiece &&
-//             board->isWithinBounds(row + 2 * dx[direction], col + 2 * dy[direction]) && board->getPiece((row + 2 * dx[direction], col + 2 * dy[direction]) == '0'
-//             )) {
-//             priority = -15;
-//         }
-//         //__PE
-//         if (board->isWithinBounds(row + 2*dx[direction], col +2* dy[direction]) && board->getPiece((row + 2 * dx[direction], col + 2 * dy[direction]) == enemyPiece &&
-//             board->isWithinBounds(row + dx[direction], col + dy[direction]) && board->getPiece(row + dx[direction], col + dy[direction]) == ownPiece &&
-//             board->isWithinBounds(row -  dx[direction], col - dy[direction]) && board->getPiece((row - dx[direction], col - dy[direction]) == '0'
-//             ) {
-//             priority = -15;
-//         }
-//         //_P_E
-//         if (board->isWithinBounds(row - dx[direction], col - dy[direction]) && board->getPiece(row - dx[direction], col - dy[direction]) == ownPiece &&
-//             board->isWithinBounds(row + dx[direction], col + dy[direction]) && board->getPiece(row + dx[direction], col + dy[direction]) == enemyPiece &&
-//             board->isWithinBounds(row - 2 * dx[direction], col - 2 * dy[direction]) && board->getPiece(row - 2 * dx[direction], col - 2 * dy[direction]) == '0
-//             ) {
-//             priority = -15;
-//         }
-//
-//         //EP__
-//         if (board->isWithinBounds(row - dx[direction], col - dy[direction]) && board->getPiece(row - dx[direction], col - dy[direction]) == ownPiece &&
-//             board->isWithinBounds(row + dx[direction], col + dy[direction]) && board->getPiece(row + dx[direction], col + dy[direction]) == '0' &&
-//             board->isWithinBounds(row - 2 * dx[direction], col - 2 * dy[direction]) && board->getPiece(row - 2 * dx[direction], col - 2 * dy[direction]) == enemyPiece
-//             ) {
-//             priority = -15;
-//         }
-//
-//     }
-//
-//     return { priority, reason };
-// }
-
 std::string ComputerStrategy::convertPosToString(int row, int col)
 {
 
@@ -715,7 +837,7 @@ std::string ComputerStrategy::convertPosToString(int row, int col)
     char colAlphabet = 'A' + col - 1;
     std::string rowString = std::to_string(20 - row); // because row label is inverted
     std::string inputString = colAlphabet + rowString;
-    std::cout << "Computer placed at " << inputString << std::endl;
+
     return inputString;
 }
 
@@ -735,7 +857,7 @@ std::string ComputerStrategy::determineBestPosition(Board *board, Player *comput
 
                 // if it is second turn , White, and within 3 steps from center
                 // set priority to negative...we dont wanna put out piece there
-                if (r->getTurnNum() == 3 && abs(row - 10) <= 3 && abs(col - 10) <= 3)
+                if (r->getTurnNum() == 2 && abs(row - 10) <= 3 && abs(col - 10) <= 3)
                 {
                     boardPriority[row][col] = -1;
                     continue;
@@ -749,8 +871,12 @@ std::string ComputerStrategy::determineBestPosition(Board *board, Player *comput
                 results.push_back(calculateEndGamePriorityWith5Consectuives(row, col, board, r->getCurrentPlayer(), r));       // 2
                 results.push_back(calculateOpponentsEndGamePriorityWith5Consectuives(row, col, board, r->getNextPlayer(), r)); // 3, *2
                 results.push_back(calculatePriorityWith4Consectuives(row, col, board, r->getCurrentPlayer(), r));              // 4
+                results.push_back(calculateOpponentPriorityWith4Consectuives(row, col, board, r->getNextPlayer(), r));         // 5
+                results.push_back(calculatePriorityWith3Consectuives(row, col, board, r->getCurrentPlayer(), r));              // 4
+                results.push_back(calculateOpponentPriorityWith3Consectuives(row, col, board, r->getNextPlayer(), r));         // 5
+                results.push_back(calculatePriorityWith2Consectuives(row, col, board, r->getCurrentPlayer(), r));              // 4
+                results.push_back(calculateOpponentPriorityWith2Consectuives(row, col, board, r->getNextPlayer(), r));         // 5
 
-                results.push_back(calculateOpponentPriorityWith4Consectuives(row, col, board, r->getNextPlayer(), r));          // 5
                 results.push_back(calculateStopOpponentPriority(row, col, board, r->getCurrentPlayer(), r->getNextPlayer()));   // 6
                 results.push_back(calculateCaptureRiskPriority(row, col, board, r->getCurrentPlayer(), r->getNextPlayer(), r)); // 7
                 int maxPForThisSpace = -1;
@@ -758,7 +884,7 @@ std::string ComputerStrategy::determineBestPosition(Board *board, Player *comput
                 for (int i = 0; i <= results.size() - 1; i++)
                 {
                     int p = results[i].first;
-                    if (i == 2)
+                    if (i == 2 || i == 3)
                     {
                         p *= 2; // give double priority to stop opponent from getting the game points
                     }
@@ -791,11 +917,17 @@ std::string ComputerStrategy::determineBestPosition(Board *board, Player *comput
     }*/
 
     // Place the computer player's piece at (bestRow, bestCol)
-    std::cout << finalReason << std::endl;
+
+    setFinalReason(finalReason);
     return convertPosToString(bestRow, bestCol);
 }
 
-std::string ComputerStrategy::provideReasonForBestPos(int priority)
+std::string ComputerStrategy::getFinalReason()
 {
-    return reasons[priority];
+    return this->bestReason;
+}
+
+void ComputerStrategy::setFinalReason(std::string reason)
+{
+    this->bestReason = reason;
 }

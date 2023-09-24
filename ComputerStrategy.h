@@ -18,7 +18,8 @@ public:
     // convert the best position to string input form A10
     std::string convertPosToString(int row, int col);
     std::string determineBestPosition(Board *board, Player *computerPlayer, Player *humanPlayer, Round *r);
-    std::string provideReasonForBestPos(int priority);
+    void setFinalReason(std::string reason);
+    std::string getFinalReason();
 
 private:
     // Helper methods for each criterion
@@ -27,6 +28,12 @@ private:
     std::pair<int, std::string> calculatePriorityWith4Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r);
     std::pair<int, std::string> calculateOpponentPriorityWith4Consectuives(int row, int col, Board *board, Player *opponentPlayer, Round *r);
 
+    std::pair<int, std::string> calculatePriorityWith3Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r);
+    std::pair<int, std::string> calculateOpponentPriorityWith3Consectuives(int row, int col, Board *board, Player *opponentPlayer, Round *r);
+
+    std::pair<int, std::string> calculatePriorityWith2Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r);
+    std::pair<int, std::string> calculateOpponentPriorityWith2Consectuives(int row, int col, Board *board, Player *opponentPlayer, Round *r);
+
     std::pair<int, std::string> calculateEndGamePriorityWith5Consectuives(int row, int col, Board *board, Player *computerPlayer, Round *r);
     std::pair<int, std::string> calculateOpponentsEndGamePriorityWith5Consectuives(int row, int col, Board *board, Player *opponentPlayer, Round *r);
 
@@ -34,6 +41,6 @@ private:
     std::pair<int, std::string> calculateCaptureRiskPriority(int row, int col, Board *board, Player *computerPlayer, Player *humanPlayer, Round *r);
 
     Tournament *t;
-    std::map<int, std::string> reasons;
+    std::string bestReason = "";
 };
 #endif

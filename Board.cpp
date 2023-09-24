@@ -450,10 +450,10 @@ int Board::checkForFoursVertical(char piece)
 // }
 
 // Member function to display the board
-void Board::DisplayBoard(Round *r)
+void Board::DisplayBoard(Round *r, Tournament *t)
 {
     // Do not show 4consecutives here. we will show at the end of the round
-    std::cout << "--------------------------------------------------------------------------------------\n";
+    std::cout << "----------------------------------------------------------------------------------------------------------\n";
 
     // Implement this method to display the game board, scores, and turn
     for (int i = 0; i < 20; i++)
@@ -487,12 +487,14 @@ void Board::DisplayBoard(Round *r)
             std::cout << "      ";
             std::cout << r->getCurrentPlayer()->getName() << "'s Color is " << r->getCurrentPlayer()->getColor();
             std::cout << ". Pairs captured = " << r->getPairsCapturedNum(r->getCurrentPlayer());
+            std::cout << ". Tournament Score = " << t->getTotalScores(r->getCurrentPlayer(), true);
         }
         if (i == 11)
         {
             std::cout << "      ";
             std::cout << r->getNextPlayer()->getName() << "'s Color is " << r->getNextPlayer()->getColor();
             std::cout << ". Pairs captured = " << r->getPairsCapturedNum(r->getNextPlayer());
+            std::cout << ". Tournament Score = " << t->getTotalScores(r->getNextPlayer(), true);
         }
         if (i == 12)
         {
@@ -507,32 +509,13 @@ void Board::DisplayBoard(Round *r)
 
         std::cout << std::endl;
     }
-    std::cout << "--------------------------------------------------------------------------------------\n";
+    std::cout << "----------------------------------------------------------------------------------------------------------\n";
 }
 
 // Member function to parse input into board indices
 bool Board::parsePosition(const std::string &input)
 {
-    // Implement this method to parse the input into row and column indices
 
-    if ((input.size() == 1 && tolower(input[0]) != 'h') && input.size() > 3)
-    {
-        showComment("Invalid Input");
-        return false;
-    }
-
-    // TODO
-    if (input.size() == 1 && tolower(input[0]) == 'h')
-    {
-        // provide help
-        // this help will come from Strategy class and that has not been implemented yet
-        // once it shows the suggested intersection, reprompt the human player to put in his input
-        // to do that return false, because if parsePosition returns false, the while loop continues
-        // skipping the checkValidity step
-        return false;
-    }
-
-    // input = toupper(input);
     char colChar = toupper(input[0]);
     int numericEquivalent = colChar - 'A' + 1;
     if (numericEquivalent < 1 || numericEquivalent > 19)

@@ -14,6 +14,7 @@ bool Human::makeMove(Round *r, Board *b, ComputerStrategy *c, Tournament *t)
 {
     // call askinput from board
     // call askinput from board
+
     if (r->getTurnNum() != 0)
     {
         if (!r->askPositionInput(b, t->getHuman(), t->getComputer(), t, c))

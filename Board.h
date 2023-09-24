@@ -12,7 +12,7 @@ class Board
 {
 private:
     char board[20][20]; // 2D array for the game board
-    int row;            // current row passed the current player
+    int row;            // current row passed by the current player
     int col;            // current column passed by the current player
 
 public:
@@ -20,26 +20,23 @@ public:
     Board();
 
     // Member functions
-    void resetBoard();                            // done
-    bool placeYourPiece(Round *r, Tournament *t); // done incomplete
-    bool checkValidity(Round *r);                 // done
+    void resetBoard();
+    bool placeYourPiece(Round *r, Tournament *t);
+    bool checkValidity(Round *r);
 
-    bool checkAndCapture(Round *r, Player *p, Player *e);     // done
-    bool checkForPairs(Player *p, Player *e, int dx, int dy); // dome
-    bool capturePairs(Round *r, Player *p, int dx, int dy);   // done incomplete
-    bool checkForFive(Round *r, Tournament *t);               // done incomplete
-    int checkForFours(Round *r, char piece, Player *p);       // this could be a function of strategy class... done
+    bool checkAndCapture(Round *r, Player *p, Player *e);
+    bool checkForPairs(Player *p, Player *e, int dx, int dy);
+    bool capturePairs(Round *r, Player *p, int dx, int dy);
+    bool checkForFive(Round *r, Tournament *t);
+    int checkForFours(Round *r, char piece, Player *p);
     int checkForFoursHorizontal(char piece);
     int checkForFoursVertical(char piece);
-    void DisplayBoard(Round *r);                  // done incomplete
-    bool parsePosition(const std::string &input); // done
-    void showComment(const std::string &comment); // done
-    bool isWithinBounds(int row, int col);        // done
+    void DisplayBoard(Round *r, Tournament *t);
+    bool parsePosition(const std::string &input);
+    void showComment(const std::string &comment);
+    bool isWithinBounds(int row, int col);
     char getPiece(int row, int col);
     void setPiece(int row, int col, char c);
-
-private:
-    // Private helper functions
 };
 
 #endif // BOARD_H

@@ -89,12 +89,15 @@ bool Tournament::LoadGame(std::string filename, Board *b, Round *r)
         for (int j = 0; j < 19; ++j)
         {
             // if character is not zero, increment turn number
-            if (line[j] != '0')
+            if (line[j] != 'O' && line[j] != '0')
             {
-
+                b->setPiece(i + 1, j + 1, line[j]); // since the board content starts from 1 row and 1 col
                 turnNum++;
             }
-            b->setPiece(i + 1, j + 1, line[j]); // since the board content starts from 1 row and 1 col
+            else
+            {
+                b->setPiece(i + 1, j + 1, '0');
+            }
         }
     }
     r->setTurnNum(turnNum);
@@ -129,10 +132,11 @@ int Tournament::getTotalScores(Player *p, bool saving)
         totalScore += r->getFourConsecutivesNum(p);
         totalScore += r->getGamePoints(p);
     }
-    return totalScore;
+    return totalScore + loadedScores[p];
 }
 void Tournament::showTotalScoresForBoth()
 {
+    std::cout << "Showing Tournament Scores: \n";
     std::cout << "Human : " << getTotalScores(human) << std::endl;
     std::cout << "Computer : " << getTotalScores(computer) << std::endl;
 }

@@ -28,10 +28,10 @@ int main()
 
     // ask if the user wants to load a game
     char loader;
-    std::cout << "Do you want to load a game? Enter y/Y for yes or n/N for no\n";
 
     do
     {
+        std::cout << "Do you want to load a game? Enter y/Y for yes or n/N for no\n";
         std::cin >> loader;
         loader = std::tolower(loader); // Convert the input character to lowercase
     } while (loader != 'y' && loader != 'n');
@@ -48,9 +48,12 @@ int main()
             std::cin >> filename;
 
             // if filename does not have .txt extension, add it
-            if (filename.substr(filename.size() - 1 - 3) != ".txt")
-            {
-                filename += ".txt";
+            if (filename.size() > 4)
+            { // otherwise address error
+                if (filename.substr(filename.size() - 1 - 3) != ".txt")
+                {
+                    filename += ".txt";
+                }
             }
 
             if (!tournament->LoadGame(filename, board, r))
@@ -81,7 +84,7 @@ int main()
         }
     }
 
-    // Tournament is over;
+    // Tournament is over and not paused for serialization
     if (!tournament->getPause())
     {
         tournament->displayScoresForAllRounds();
@@ -95,7 +98,7 @@ int main()
 void gameLoop(Round *r, Board *b, Player *human, Player *computer, Tournament *t, ComputerStrategy *c, bool &unpause)
 {
     // r->startRound(t, b);
-    b->DisplayBoard(r);
+    b->DisplayBoard(r, t);
     bool gameEnded = false;
     bool gamePaused = false;
     while (!gameEnded)
@@ -112,7 +115,7 @@ void gameLoop(Round *r, Board *b, Player *human, Player *computer, Tournament *t
         }
         if (!t->getPause())
         {
-            b->DisplayBoard(r);
+            b->DisplayBoard(r, t);
         }
     }
 
