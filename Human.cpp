@@ -16,13 +16,14 @@ bool Human::makeMove(Round *r, Board *b, ComputerStrategy *c, Tournament *t)
     // call askinput from board
     if (r->getTurnNum() != 0)
     {
-        if (!r->askPositionInput(b, t->getHuman(), t->getComputer(), t))
+        if (!r->askPositionInput(b, t->getHuman(), t->getComputer(), t, c))
         {
             t->setPause(); // willl pause and quit game
             return false;
         }
     }
+
     // call placeyourpiece function from the board
-    return b->placeYourPiece(r);
+    return b->placeYourPiece(r, t);
     // call change turn from round here
 }

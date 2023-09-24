@@ -20,7 +20,7 @@ public:
     ~Tournament();
     void setUpPlayers(Player *h, Player *c);
     Round *createANewRound();
-    int getTotalScores(Player *p);
+    int getTotalScores(Player *p, bool saving = false);
     void showTotalScoresForBoth();
     void announceWinner();
     void displayScoresForAllRounds();

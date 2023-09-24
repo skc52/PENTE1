@@ -1,6 +1,7 @@
 #include "Round.h"
 #include "Player.h"
 #include "Tournament.h"
+#include "ComputerStrategy.h"
 #include "Board.h"
 #include <random>
 #include <ctime>
@@ -8,7 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-
+#include <algorithm>
 Round::Round()
 {
     this->currentTurnNum = 0;
@@ -144,26 +145,30 @@ void Round::loadRound(std::string filename, Player *human, Player *computer, Tou
     turnNum = turnNum + hCapturedPairs * 2 + cCapturedPairs * 2;
     setTurnNum(turnNum - 1);
 }
+
 bool Round::coinToss()
 {
     char humanChoice;
-    std::cout << "Coin toss: Enter 'H' for heads or 'T' for tails: ";
-    std::cin >> humanChoice;
+    do
+    {
+        std::cout << "Coin toss: Enter 'H' for heads or 'T' for tails: ";
+        std::cin >> humanChoice;
+    } while (humanChoice != tolower('h') && humanChoice != tolower('t'));
     // Use the current time as a seed for random number generation
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     // Generate a random number
     humanChoice = toupper(humanChoice);
     char toss = (std::rand() % 2) ? 'H' : 'T';
-    std::cout << "It was : " << toss << std::endl;
+    std::cout << "It was : " << toss;
 
     if (humanChoice == toss)
     {
-        std::cout << "You won the toss!\n";
+        std::cout << ". Human won the toss!\n";
         return true;
     }
     else
     {
-        std::cout << "Computer won the toss.\n";
+        std::cout << ". Computer won the toss.\n";
         return false;
     }
 }
@@ -171,7 +176,7 @@ bool Round::coinToss()
 void Round::startRound(Tournament *t, Board *b)
 {
     // Implementation for startRound
-    std::cout << "STARTING ROUND\n";
+    std::cout << "Starting round " << t->getRoundsCount() << ".";
     b->resetBoard();
     // intialize white and black players
     if (t->getRoundsCount() == 1 || t->getTotalScores(t->getHuman()) == t->getTotalScores(t->getComputer())) // if first round or scores are same, toos coin to determine starter
@@ -204,12 +209,10 @@ void Round::startRound(Tournament *t, Board *b)
     currentPlayer->setColor('W');
     nextPlayer->setColor('B');
     std::cout << currentPlayer->getName() << " is starting the game\n";
-    // Place the piece in J10 (10, 10)
-
     currentPlayer->makeMove(this, b, nullptr, t);
 }
 
-void Round::changeTurn()
+void Round::changeTurn(Board *b, Player *human, Player *computer, Tournament *t)
 {
     // Implementation for changeTurn
     incrementTurnNum();
@@ -231,32 +234,66 @@ void Round::setTurnNum(int num)
 
 void Round::incrementTurnNum()
 {
-    // Implementation for incrementTurnNum
-
     this->currentTurnNum += 1;
 }
 
-bool Round::askPositionInput(Board *b, Player *human, Player *computer, Tournament *t) // false means the game has ended...possibly quitted by human player
+bool Round::askPositionInput(Board *b, Player *human, Player *computer, Tournament *t, ComputerStrategy *c) // false means the game has ended...possibly quitted by human player
 {
-    // Implementation for askPositionInput
+
+    // ask if user wants to continue or save and quit
+
+    char saveState;
+
+    do
+    {
+        std::cout << "Enter s/S to save and quit your game. Enter c/c to continue with the game.\n";
+        std::cin >> saveState;
+    } while (tolower(saveState) != 's' && tolower(saveState) != 'c');
+
+    if (tolower(saveState) == 's')
+    {
+
+        saveGameToFile(b, human, computer, t);
+        return false;
+    }
+    // if the current player is computer, then only upto this part of this function will execute
+
+    if (currentPlayer == computer)
+    {
+        return true;
+    }
+
+    // ask user if he wants help
+    char helpState;
+
+    do
+    {
+        std::cout << "Enter h/H to get recommendations on where to place your piece, c/c to continue with the game\n";
+        std::cin >> helpState;
+    } while (tolower(helpState) != 'h' && tolower(helpState) != 'c');
+
+    if (tolower(helpState) == 'h')
+    {
+        // provide suggestion on where to put next piece
+        std::string bestPosition, reason;
+        // reasoning is provided in determineBestPosition itself
+        bestPosition = c->determineBestPosition(b, getCurrentPlayer(), getNextPlayer(), this);
+        std::cout << "Recommended position would be " << bestPosition << std::endl;
+    }
+
+    // asking for user input
     bool isValidPos = false;
     std::string position;
     while (!isValidPos)
     {
         std::cout << "Enter the intersection you want to put your piece in. Follow the format A10, B2, K16.\n";
-        std::cout << "Else, enter H for suggestion. Enter SAVE to save and quit your game\n";
         std::cin >> position;
-        if (position == "SAVE")
-        {
-            // TODO
-            saveGameToFile(b, human, computer, t);
-            return false;
-        }
+
         if (!b->parsePosition(position))
             continue;
-        isValidPos = b->checkValidity();
+        isValidPos = b->checkValidity(this);
     }
-    std::cout << "You entered\n";
+    std::cout << "Human entered " << position << std::endl;
     return true;
 }
 
@@ -314,41 +351,28 @@ void Round::setFourConsecutive(Player *p, int foursCount)
 {
     // Implementation for setFourConsecutive
     fourConsecutive[p] = foursCount;
-
-    if (winnerOfTheRound == p)
-    {
-        fourConsecutive[p] -= 1;
-    }
 }
 
-void Round::setGamePoints(Player *p)
+void Round::setGamePoints(Player *p, Tournament *t)
 {
     // Implementation for setGamePoints
     gamePoints[p] = 5;
-    winnerOfTheRound = p;
-    loserOFTheRound = p == currentPlayer ? nextPlayer : currentPlayer;
-}
 
-void Round::announceWinnerOfTheRound()
-{
-    // Implementation for announceWinnerOfTheRound
-    if (getWinner())
-    {
-        std::cout << "ROUND WINNER " << getWinner()->getName() << std::endl;
-    }
-    else
-    {
-        std::cout << "ROUND WAS A DRAW" << std::endl;
-    }
+    // Winner of The Round is the player with most scores in the tournament up to that point
+    winnerOfTheRound = t->getTotalScores(currentPlayer) < t->getTotalScores(nextPlayer) ? nextPlayer : currentPlayer;
+
+    loserOFTheRound = winnerOfTheRound == currentPlayer ? nextPlayer : currentPlayer;
 }
 
 void Round::displayClosingStats()
 {
     // Implementation for displayClosingStats
-    std::cout << currentPlayer->getName() << " : "
+    std::cout << currentPlayer->getName() << " scored " << getPairsCapturedNum(currentPlayer) + getFourConsecutivesNum(currentPlayer) + getGamePoints(currentPlayer)
+              << " points. "
               << "Pairs captured = " << getPairsCapturedNum(currentPlayer);
     std::cout << " Four consecutives = " << getFourConsecutivesNum(currentPlayer) << " Game Points " << getGamePoints(currentPlayer) << std::endl;
-    std::cout << nextPlayer->getName() << " : "
+    std::cout << nextPlayer->getName() << " scored " << getPairsCapturedNum(nextPlayer) + getFourConsecutivesNum(nextPlayer) + getGamePoints(nextPlayer)
+              << " points. "
               << "Pairs captured = " << getPairsCapturedNum(nextPlayer);
     std::cout << " Four consecutives = " << getFourConsecutivesNum(nextPlayer) << " Game Points " << getGamePoints(nextPlayer) << std::endl;
 }
@@ -419,18 +443,19 @@ void Round::saveGameToFile(Board *b, Player *human, Player *computer, Tournament
         }
         outputFile << "Human: " << std::endl;
         outputFile << "Captured pairs: " << getPairsCapturedNum(human) << std::endl;
-        outputFile << "Score: " << t->getTotalScores(human) << std::endl
+        outputFile << "Score: " << t->getTotalScores(human, true) << std::endl
                    << std::endl;
 
         outputFile << "Computer: " << std::endl;
         outputFile << "Captured pairs: " << getPairsCapturedNum(computer) << std::endl;
-        outputFile << "Score: " << t->getTotalScores(computer) << std::endl
+        outputFile << "Score: " << t->getTotalScores(computer, true) << std::endl
                    << std::endl;
 
         // everytime human saves the game, so when he is saving and quitting the game he cannot place any moves, so it is always
         // his turn when he loads up a game
         std::string colorNext = currentPlayer->getColor() == 'W' ? "White" : "Black";
-        outputFile << "Next Player: Human - " << colorNext << std::endl;
+        std::string nextPlayerCategory = currentPlayer->getName() != "ROBOT" ? "Human" : "Computer";
+        outputFile << "Next Player: " << nextPlayerCategory << " - " << colorNext << std::endl;
         outputFile.close();
         std::cout << "File written successfully." << std::endl;
     }

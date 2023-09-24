@@ -74,6 +74,8 @@ bool Tournament::LoadGame(std::string filename, Board *b, Round *r)
 
     // initalize the board with the data there
     //  // Read the board data character by character
+    int turnNum = 0;
+
     for (int i = 0; i < 19; ++i)
     {
         std::getline(inputFile, line); // Read the line with the board data
@@ -84,18 +86,19 @@ bool Tournament::LoadGame(std::string filename, Board *b, Round *r)
         }
 
         // Store the first 19 characters in the board
-        int turnNum = 0;
         for (int j = 0; j < 19; ++j)
         {
             // if character is not zero, increment turn number
             if (line[j] != '0')
             {
+
                 turnNum++;
             }
             b->setPiece(i + 1, j + 1, line[j]); // since the board content starts from 1 row and 1 col
         }
-        r->setTurnNum(turnNum);
     }
+    r->setTurnNum(turnNum);
+
     // Close the file
     inputFile.close();
     // set the turn to the next player mentioned in the file
@@ -111,12 +114,17 @@ int Tournament::getRoundsCount()
 {
     return rounds.size();
 }
-int Tournament::getTotalScores(Player *p)
+int Tournament::getTotalScores(Player *p, bool saving)
 {
     int totalScore = 0;
     for (int i = 0; i < this->rounds.size(); i++)
     {
         Round *r = rounds[i];
+        // if saving is true && then dont include the score for the current round
+        if (saving && i == this->rounds.size() - 1)
+        {
+            break;
+        }
         totalScore += r->getPairsCapturedNum(p);
         totalScore += r->getFourConsecutivesNum(p);
         totalScore += r->getGamePoints(p);

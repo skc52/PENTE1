@@ -19,6 +19,12 @@ bool Computer::makeMove(Round *r, Board *b, ComputerStrategy *c, Tournament *t)
     std::string inputString;
     if (r->getTurnNum() != 0)
     {
+
+        if (!r->askPositionInput(b, t->getHuman(), t->getComputer(), t, c))
+        {
+            t->setPause(); // willl pause and quit game
+            return false;
+        }
         // r->askPositionInput(b);
         inputString = c->determineBestPosition(b, r->getCurrentPlayer(), r->getNextPlayer(), r);
         b->parsePosition(inputString);
@@ -27,6 +33,6 @@ bool Computer::makeMove(Round *r, Board *b, ComputerStrategy *c, Tournament *t)
     // std::string inputString = c->determineBestPosition(b, r->getCurrentPlayer(), r->getNextPlayer());
     // b->parsePosition(inputString);
     // strategy will call bestPosition,
-    return b->placeYourPiece(r);
+    return b->placeYourPiece(r, t);
     // call change turn from round here
 }

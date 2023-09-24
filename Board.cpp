@@ -1,6 +1,7 @@
 #include "Board.h"
 #include "Player.h"
 #include "Round.h"
+#include "Tournament.h"
 #include <iostream>
 
 // Constructor
@@ -13,7 +14,6 @@ Board::Board()
 // Member function to reset the board
 void Board::resetBoard()
 {
-    std::cout << "Initializing the board\n";
 
     // add col labels
     for (int i = 1; i < 20; i++)
@@ -40,8 +40,8 @@ void Board::resetBoard()
 }
 
 // Member function to place the player's piece in the desired intersection
-bool Board::placeYourPiece(Round *r) // will return false if the game has ended
-{                                    // TODO this should be in Player class
+bool Board::placeYourPiece(Round *r, Tournament *t) // will return false if the game has ended
+{                                                   // TODO this should be in Player class
     // Implement this method to handle player input and game logic
     // keep on asking until a valid input is given
     //   askInput();
@@ -52,6 +52,7 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
     {
         board[10][10] = 'W';
     }
+
     else
     {
         board[this->row][this->col] = r->getCurrentPlayer()->getColor();
@@ -68,7 +69,7 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
 
         // also checks for 5 consecutive pieces, if so game terminates
         // TODO: how to terminate the game
-        if (checkForFive(r))
+        if (checkForFive(r, t))
         { // if five consecutive return false to end the game loop
             checkForFours(r, r->getCurrentPlayer()->getColor(), r->getCurrentPlayer());
             checkForFours(r, r->getNextPlayer()->getColor(), r->getNextPlayer());
@@ -82,13 +83,26 @@ bool Board::placeYourPiece(Round *r) // will return false if the game has ended
 }
 
 // Member function to check the validity of the inputted position
-bool Board::checkValidity()
+bool Board::checkValidity(Round *r)
 {
     // Implement this method to check if the position is valid
     // private members row and col hold the inputted values
     // position must be within bounds and empty
 
     // TODO FOR THE SECOND TURN OF WHITE, MUST BE PLACED 3 steps away from the center
+    // on second turn of the white..white must place 3 steps away
+    // i have to implement this in computer strategy too
+    if (r->getTurnNum() == 2 && r->getCurrentPlayer()->getColor() == 'W')
+    {
+        // if human inputs within 3 steps from the center
+        // re ask for input
+        if (abs(this->row - 10) <= 3 && abs(this->col - 10) <= 3)
+        {
+
+            showComment("White cannot put its piece within 3 steps of the center on its second turn. Re input your position.");
+            return false;
+        }
+    }
 
     if (isWithinBounds(this->row, this->col) && board[row][col] == '0')
     {
@@ -193,8 +207,7 @@ bool Board::capturePairs(Round *r, Player *p, int dx, int dy) // returns true if
     //  TODO captured pair == 5, game ended, announce winner, closing stats, checkforfours
     if (r->getPairsCapturedNum(p) == 5)
     {
-        // r->setGamePoints(p);
-        r->announceWinnerOfTheRound();
+
         return true;
     }
 
@@ -202,7 +215,7 @@ bool Board::capturePairs(Round *r, Player *p, int dx, int dy) // returns true if
 }
 
 // Member function to check for five consecutive pieces
-bool Board::checkForFive(Round *r)
+bool Board::checkForFive(Round *r, Tournament *t)
 {
     // Implement this method to check for five consecutive pieces
     char currentPlayerPiece = board[this->row][this->col]; // Current player's piece
@@ -244,8 +257,19 @@ bool Board::checkForFive(Round *r)
         // will start the next round, if the game continues
         if (count >= 5)
         {
-            r->setGamePoints(r->getCurrentPlayer());
-            r->announceWinnerOfTheRound();
+            // the consecutives that have been used to end the game cannot be considered for points from 4 consecutives
+            // so the max number of consecutives for that case will be 9 = 4 _ 4
+            // sp, the 4consecutive function considers this consecutive too, so we need to make sure
+            // that we subtract 2 or 1 whichever is appropriate from four consecutive count
+            if (count >= 8)
+            {
+                r->setFourConsecutive(r->getCurrentPlayer(), -2);
+            }
+            else
+            {
+                r->setFourConsecutive(r->getCurrentPlayer(), -1);
+            }
+            r->setGamePoints(r->getCurrentPlayer(), t);
             return true;
         }
     }
@@ -260,14 +284,15 @@ int Board::checkForFours(Round *r, char piece, Player *p)
     // Define directions: horizontal, vertical, and both diagonals
     int directions[4][2] = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
 
-    // Iterate through rows and columns
-    for (int i = 1; i < 20; i++)
+    // Check in all directions
+    for (int d = 0; d < 4; d++)
     {
-        for (int j = 1; j < 20; j++)
+        // Iterate through rows and columns
+        for (int i = 1; i < 20; i++)
         {
-            // Check in all directions
-            for (int d = 0; d < 4; d++)
+            for (int j = 1; j < 20; j++)
             {
+
                 bool consecutive4 = true;
 
                 // Check four consecutive pieces in the current direction
@@ -295,13 +320,14 @@ int Board::checkForFours(Round *r, char piece, Player *p)
                 if (consecutive4)
                 {
                     foursCount++;
+                    j += 4;
                 }
             }
         }
     }
     std::cout << "4 consecutives for " << p->getName() << " " << foursCount << std::endl;
 
-    r->setFourConsecutive(p, foursCount);
+    r->setFourConsecutive(p, r->getFourConsecutivesNum(p) + foursCount);
 
     return foursCount;
 }
@@ -426,16 +452,23 @@ int Board::checkForFoursVertical(char piece)
 // Member function to display the board
 void Board::DisplayBoard(Round *r)
 {
-    std::cout << "Displaying the board\n";
+    // Do not show 4consecutives here. we will show at the end of the round
+    std::cout << "--------------------------------------------------------------------------------------\n";
 
     // Implement this method to display the game board, scores, and turn
     for (int i = 0; i < 20; i++)
     {
-
-        std::cout << 20 - i << " ";
-        if (20 - i <= 9)
+        if (i != 0)
         {
-            std::cout << " ";
+            if (20 - i <= 9)
+            {
+                std::cout << " ";
+            }
+            std::cout << 20 - i << " ";
+        }
+        else
+        {
+            std::cout << "   ";
         }
         for (int j = 1; j < 20; j++)
         {
@@ -448,14 +481,33 @@ void Board::DisplayBoard(Round *r)
                 std::cout << board[i][j] << " ";
             }
         }
+
+        if (i == 10)
+        {
+            std::cout << "      ";
+            std::cout << r->getCurrentPlayer()->getName() << "'s Color is " << r->getCurrentPlayer()->getColor();
+            std::cout << ". Pairs captured = " << r->getPairsCapturedNum(r->getCurrentPlayer());
+        }
+        if (i == 11)
+        {
+            std::cout << "      ";
+            std::cout << r->getNextPlayer()->getName() << "'s Color is " << r->getNextPlayer()->getColor();
+            std::cout << ". Pairs captured = " << r->getPairsCapturedNum(r->getNextPlayer());
+        }
+        if (i == 12)
+        {
+            std::cout << "      ";
+            std::cout << "Next player is " << r->getNextPlayer()->getName();
+        }
+        if (i == 13)
+        {
+            std::cout << "      ";
+            std::cout << "Turn num is " << r->getTurnNum();
+        }
+
         std::cout << std::endl;
     }
-    // Do not show 4consecutives here. we will show at the end
-    std::cout << r->getCurrentPlayer()->getName() << "'s turn. Color is " << r->getCurrentPlayer()->getColor() << std::endl;
-    std::cout << "Pairs captured = " << r->getPairsCapturedNum(r->getCurrentPlayer()) << std::endl;
-
-    std::cout << r->getNextPlayer()->getName() << "'s turn. Color is " << r->getNextPlayer()->getColor() << std::endl;
-    std::cout << "Pairs captured = " << r->getPairsCapturedNum(r->getNextPlayer()) << std::endl;
+    std::cout << "--------------------------------------------------------------------------------------\n";
 }
 
 // Member function to parse input into board indices
@@ -483,7 +535,6 @@ bool Board::parsePosition(const std::string &input)
     // input = toupper(input);
     char colChar = toupper(input[0]);
     int numericEquivalent = colChar - 'A' + 1;
-    std::cout << "Column " << numericEquivalent << "was entered\n";
     if (numericEquivalent < 1 || numericEquivalent > 19)
     {
         showComment("Enter column from A - S only");

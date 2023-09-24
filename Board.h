@@ -7,6 +7,7 @@
 // Forward declaration of the Player and Round class
 class Player;
 class Round;
+class Tournament;
 class Board
 {
 private:
@@ -19,14 +20,14 @@ public:
     Board();
 
     // Member functions
-    void resetBoard();             // done
-    bool placeYourPiece(Round *r); // done incomplete
-    bool checkValidity();          // done
+    void resetBoard();                            // done
+    bool placeYourPiece(Round *r, Tournament *t); // done incomplete
+    bool checkValidity(Round *r);                 // done
 
     bool checkAndCapture(Round *r, Player *p, Player *e);     // done
     bool checkForPairs(Player *p, Player *e, int dx, int dy); // dome
     bool capturePairs(Round *r, Player *p, int dx, int dy);   // done incomplete
-    bool checkForFive(Round *r);                              // done incomplete
+    bool checkForFive(Round *r, Tournament *t);               // done incomplete
     int checkForFours(Round *r, char piece, Player *p);       // this could be a function of strategy class... done
     int checkForFoursHorizontal(char piece);
     int checkForFoursVertical(char piece);
